@@ -17,16 +17,8 @@ export default function Navbar() {
   return (
     <nav className="border-b bg-background px-4 py-3">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center">
           <SidebarTrigger />
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">
-                RP
-              </span>
-            </div>
-            <h1 className="text-xl font-semibold">Registro de Ponto</h1>
-          </div>
         </div>
 
         <div className="flex items-center gap-4">

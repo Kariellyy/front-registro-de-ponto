@@ -68,6 +68,16 @@ export default function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
+        <div className="px-4 py-4 border-b">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">
+                RP
+              </span>
+            </div>
+            <h1 className="text-xl font-semibold">Registro de Ponto</h1>
+          </div>
+        </div>
         <SidebarGroup>
           <SidebarGroupLabel>Sistema de Ponto</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -76,10 +86,10 @@ export default function AppSidebar() {
                 const isActive = pathname === item.href;
                 return (
                   <SidebarMenuItem key={item.name}>
-                    <SidebarMenuButton asChild isActive={isActive}>
+                    <SidebarMenuButton asChild isActive={isActive} size="lg">
                       <Link href={item.href}>
                         <item.icon />
-                        <span>{item.name}</span>
+                        <span className="text-base font-medium">{item.name}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
