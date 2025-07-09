@@ -1,5 +1,10 @@
 "use client";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+
 interface AttendanceData {
   day: string;
   present: number;
@@ -17,55 +22,47 @@ const attendanceData: AttendanceData[] = [
 ];
 
 export default function AttendanceChart() {
-  const maxValue = Math.max(...attendanceData.map((d) => d.present + d.absent));
-
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">
-        Presença Semanal
-      </h3>
+    <Card>
+      <CardHeader>
+        <CardTitle>Presença Semanal</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          {attendanceData.map((data) => {
+            const total = data.present + data.absent;
+            const presentPercentage =
+              total > 0 ? (data.present / total) * 100 : 0;
 
-      <div className="space-y-4">
-        {attendanceData.map((data) => {
-          const total = data.present + data.absent;
-          const presentPercentage =
-            total > 0 ? (data.present / total) * 100 : 0;
-
-          return (
-            <div key={data.day} className="flex items-center gap-4">
-              <div className="w-8 text-sm font-medium text-gray-600">
-                {data.day}
-              </div>
-              <div className="flex-1">
-                <div className="flex h-6 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="bg-green-500 transition-all duration-300"
-                    style={{ width: `${presentPercentage}%` }}
-                  />
-                  <div
-                    className="bg-red-400 transition-all duration-300"
-                    style={{ width: `${100 - presentPercentage}%` }}
-                  />
+            return (
+              <div key={data.day} className="flex items-center gap-4">
+                <div className="w-8 text-sm font-medium text-muted-foreground">
+                  {data.day}
+                </div>
+                <div className="flex-1 space-y-1">
+                  <Progress value={presentPercentage} className="h-6" />
+                </div>
+                <div className="text-sm text-muted-foreground w-16 text-right">
+                  {data.present}/{total}
                 </div>
               </div>
-              <div className="text-sm text-gray-600 w-16 text-right">
-                {data.present}/{total}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
 
-      <div className="flex items-center justify-center gap-6 mt-6 pt-4 border-t border-gray-200">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-green-500 rounded-full" />
-          <span className="text-sm text-gray-600">Presentes</span>
+        <Separator />
+
+        <div className="flex items-center justify-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-primary rounded-full" />
+            <span className="text-sm text-muted-foreground">Presentes</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-destructive rounded-full" />
+            <span className="text-sm text-muted-foreground">Ausentes</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-red-400 rounded-full" />
-          <span className="text-sm text-gray-600">Ausentes</span>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

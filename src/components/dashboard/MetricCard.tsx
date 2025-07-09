@@ -1,4 +1,7 @@
 import { LucideIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
   title: string;
@@ -27,31 +30,32 @@ export default function MetricCard({
   color,
 }: MetricCardProps) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
-          {trend && (
-            <div className="flex items-center mt-2">
-              <span
-                className={`text-sm font-medium ${
-                  trend.isPositive ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {trend.isPositive ? "+" : ""}
-                {trend.value}%
-              </span>
-              <span className="text-sm text-gray-500 ml-1">
-                vs mês anterior
-              </span>
-            </div>
-          )}
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <p className="text-2xl font-bold">{value}</p>
+            {trend && (
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant={trend.isPositive ? "default" : "destructive"}
+                  className="text-xs"
+                >
+                  {trend.isPositive ? "+" : ""}
+                  {trend.value}%
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  vs mês anterior
+                </span>
+              </div>
+            )}
+          </div>
+          <div className={cn("p-3 rounded-lg border", colorClasses[color])}>
+            <Icon className="w-6 h-6" />
+          </div>
         </div>
-        <div className={`p-3 rounded-lg border ${colorClasses[color]}`}>
-          <Icon className="w-6 h-6" />
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

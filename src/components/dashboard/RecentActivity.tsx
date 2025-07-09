@@ -1,4 +1,8 @@
 import { Clock, UserCheck, UserX, AlertTriangle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Activity {
   id: string;
@@ -66,33 +70,36 @@ const formatTimestamp = (timestamp: Date) => {
 
 export default function RecentActivity() {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        Atividades Recentes
-      </h3>
-
-      <div className="space-y-4">
-        {activities.map((activity) => (
-          <div key={activity.id} className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-gray-50">
-              {getActivityIcon(activity.type)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900">
-                {activity.funcionario}
-              </p>
-              <p className="text-sm text-gray-600">{activity.description}</p>
-              <p className="text-xs text-gray-500 mt-1">
-                {formatTimestamp(activity.timestamp)}
-              </p>
-            </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Atividades Recentes</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-80">
+          <div className="space-y-4">
+            {activities.map((activity) => (
+              <div key={activity.id} className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-muted">
+                  {getActivityIcon(activity.type)}
+                </div>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <p className="text-sm font-medium">{activity.funcionario}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {activity.description}
+                  </p>
+                  <Badge variant="outline" className="text-xs">
+                    {formatTimestamp(activity.timestamp)}
+                  </Badge>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </ScrollArea>
 
-      <button className="w-full mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium">
-        Ver todas as atividades
-      </button>
-    </div>
+        <Button variant="link" className="w-full mt-4 h-auto p-0">
+          Ver todas as atividades
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

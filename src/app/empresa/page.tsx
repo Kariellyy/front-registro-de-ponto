@@ -9,13 +9,14 @@ import {
 import MetricCard from "@/components/dashboard/MetricCard";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import AttendanceChart from "@/components/dashboard/AttendanceChart";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function EmpresaDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">Visão geral do sistema de ponto</p>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground">Visão geral do sistema de ponto</p>
       </div>
 
       {/* Métricas principais */}
@@ -69,11 +70,11 @@ export default function EmpresaDashboard() {
       </div>
 
       {/* Alertas e notificações */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Alertas Importantes
-        </h3>
-        <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Alertas Importantes</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
             <div>
@@ -97,8 +98,8 @@ export default function EmpresaDashboard() {
               </p>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
