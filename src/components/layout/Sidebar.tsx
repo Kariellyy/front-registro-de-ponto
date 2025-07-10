@@ -79,17 +79,16 @@ export default function AppSidebar() {
           </div>
         </div>
         <SidebarGroup>
-          <SidebarGroupLabel>Sistema de Ponto</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <SidebarMenuItem key={item.name}>
-                    <SidebarMenuButton asChild isActive={isActive} size="lg">
+                    <SidebarMenuButton asChild isActive={isActive} size="default">
                       <Link href={item.href}>
                         <item.icon />
-                        <span className="text-base font-medium">{item.name}</span>
+                        <span className="text-sm font-medium">{item.name}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
