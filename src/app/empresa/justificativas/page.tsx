@@ -1,4 +1,8 @@
 import { Search, Filter, Check, X, Eye, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const justificativas = [
   {
@@ -35,145 +39,149 @@ export default function JustificativasPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-foreground">
             Justificativas de Pontos
           </h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Gerencie as solicitações de justificativas dos funcionários
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <Button className="flex items-center gap-2">
           <Download className="w-4 h-4" />
           Exportar Relatório
-        </button>
+        </Button>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar funcionário..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar funcionário..."
+                  className="pl-10"
+                />
+              </div>
             </div>
+            <select className="px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary bg-background text-foreground">
+              <option>Todos os status</option>
+              <option>Pendente</option>
+              <option>Aprovada</option>
+              <option>Rejeitada</option>
+            </select>
+            <input
+              type="date"
+              className="px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary bg-background text-foreground"
+            />
           </div>
-          <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-            <option>Todos os status</option>
-            <option>Pendente</option>
-            <option>Aprovada</option>
-            <option>Rejeitada</option>
-          </select>
-          <input
-            type="date"
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Lista de justificativas */}
       <div className="space-y-4">
         {justificativas.map((justificativa) => (
-          <div
-            key={justificativa.id}
-            className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-4 mb-3">
-                  <h3 className="font-semibold text-gray-900">
-                    {justificativa.funcionario}
-                  </h3>
-                  <span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      justificativa.status === "pendente"
-                        ? "bg-yellow-100 text-yellow-800"
+          <Card key={justificativa.id}>
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-3">
+                    <h3 className="font-semibold text-foreground">
+                      {justificativa.funcionario}
+                    </h3>
+                    <Badge
+                      variant={
+                        justificativa.status === "pendente"
+                          ? "warning"
+                          : justificativa.status === "aprovada"
+                          ? "success"
+                          : "destructive"
+                      }
+                    >
+                      {justificativa.status === "pendente"
+                        ? "Pendente"
                         : justificativa.status === "aprovada"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {justificativa.status === "pendente"
-                      ? "Pendente"
-                      : justificativa.status === "aprovada"
-                      ? "Aprovada"
-                      : "Rejeitada"}
-                  </span>
+                        ? "Aprovada"
+                        : "Rejeitada"}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+                    <div>
+                      <span className="font-medium">Data do Ponto:</span>{" "}
+                      {new Date(justificativa.data).toLocaleDateString("pt-BR")}
+                    </div>
+                    <div>
+                      <span className="font-medium">Data da Justificativa:</span>{" "}
+                      {new Date(
+                        justificativa.dataJustificativa
+                      ).toLocaleDateString("pt-BR")}
+                    </div>
+                    <div>
+                      <span className="font-medium">Motivo:</span>{" "}
+                      {justificativa.motivo}
+                    </div>
+                  </div>
+
+                  <div className="mt-3">
+                    <span className="font-medium text-sm text-muted-foreground">
+                      Descrição:
+                    </span>
+                    <p className="text-foreground mt-1">
+                      {justificativa.descricao}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                  <div>
-                    <span className="font-medium">Data do Ponto:</span>{" "}
-                    {new Date(justificativa.data).toLocaleDateString("pt-BR")}
-                  </div>
-                  <div>
-                    <span className="font-medium">Data da Justificativa:</span>{" "}
-                    {new Date(
-                      justificativa.dataJustificativa
-                    ).toLocaleDateString("pt-BR")}
-                  </div>
-                  <div>
-                    <span className="font-medium">Motivo:</span>{" "}
-                    {justificativa.motivo}
-                  </div>
-                </div>
-
-                <div className="mt-3">
-                  <span className="font-medium text-sm text-gray-600">
-                    Descrição:
-                  </span>
-                  <p className="text-gray-700 mt-1">
-                    {justificativa.descricao}
-                  </p>
+                <div className="flex items-center gap-2 ml-4">
+                  <Button variant="ghost" size="sm">
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  {justificativa.status === "pendente" && (
+                    <>
+                      <Button variant="ghost" size="sm" className="text-success hover:text-success/70">
+                        <Check className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive/70">
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
-
-              <div className="flex items-center gap-2 ml-4">
-                <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
-                  <Eye className="w-4 h-4" />
-                </button>
-                {justificativa.status === "pendente" && (
-                  <>
-                    <button className="p-2 text-green-600 hover:bg-green-50 rounded-lg">
-                      <Check className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
       {/* Paginação */}
-      <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 px-6 py-4">
-        <div className="text-sm text-gray-600">
-          Mostrando 3 de 3 justificativas
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50"
-            disabled
-          >
-            Anterior
-          </button>
-          <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded">
-            1
-          </button>
-          <button
-            className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50"
-            disabled
-          >
-            Próximo
-          </button>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="flex items-center justify-between px-6 py-4">
+          <div className="text-sm text-muted-foreground">
+            Mostrando 3 de 3 justificativas
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled
+            >
+              Anterior
+            </Button>
+            <Button size="sm">
+              1
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled
+            >
+              Próximo
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -75,25 +75,25 @@ export default function EmpresaDashboard() {
           <CardTitle>Alertas Importantes</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
+          <div className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg dark:bg-yellow-950/20 dark:border-yellow-800/50">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
             <div>
-              <p className="font-medium text-yellow-800">
+              <p className="font-medium text-yellow-800 dark:text-yellow-300">
                 8 justificativas aguardando aprovação
               </p>
-              <p className="text-sm text-yellow-700">
+              <p className="text-sm text-yellow-700 dark:text-yellow-400">
                 Funcionários aguardando análise de justificativas de ponto
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <Clock className="w-5 h-5 text-blue-600 mt-0.5" />
+          <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-950/20 dark:border-blue-800/50">
+            <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
             <div>
-              <p className="font-medium text-blue-800">
+              <p className="font-medium text-blue-800 dark:text-blue-300">
                 Relatório mensal disponível
               </p>
-              <p className="text-sm text-blue-700">
+              <p className="text-sm text-blue-700 dark:text-blue-400">
                 Relatório de horas do mês passado pronto para envio ao contador
               </p>
             </div>

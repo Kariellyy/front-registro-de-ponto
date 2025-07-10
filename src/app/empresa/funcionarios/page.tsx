@@ -7,6 +7,10 @@ import {
   UserCheck,
   UserX,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const funcionarios = [
   {
@@ -60,176 +64,185 @@ export default function FuncionariosPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Funcionários</h1>
-          <p className="text-gray-600">Gerencie os funcionários da empresa</p>
+          <h1 className="text-2xl font-bold text-foreground">Funcionários</h1>
+          <p className="text-muted-foreground">Gerencie os funcionários da empresa</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <Button className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Novo Funcionário
-        </button>
+        </Button>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar funcionário..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar funcionário..."
+                  className="pl-10"
+                />
+              </div>
             </div>
+            <select className="px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary bg-background text-foreground">
+              <option>Todos os departamentos</option>
+              <option>Tecnologia</option>
+              <option>Produto</option>
+              <option>Gestão</option>
+              <option>Marketing</option>
+              <option>Recursos Humanos</option>
+            </select>
+            <select className="px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary bg-background text-foreground">
+              <option>Todos os status</option>
+              <option>Ativo</option>
+              <option>Inativo</option>
+              <option>Férias</option>
+              <option>Licença</option>
+            </select>
           </div>
-          <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-            <option>Todos os departamentos</option>
-            <option>Tecnologia</option>
-            <option>Produto</option>
-            <option>Gestão</option>
-            <option>Marketing</option>
-            <option>Recursos Humanos</option>
-          </select>
-          <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-            <option>Todos os status</option>
-            <option>Ativo</option>
-            <option>Inativo</option>
-            <option>Férias</option>
-            <option>Licença</option>
-          </select>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Estatísticas rápidas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-50 rounded-lg">
-              <UserCheck className="w-5 h-5 text-blue-600" />
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 dark:bg-primary/20 rounded-lg">
+                <UserCheck className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-foreground">3</div>
+                <div className="text-sm text-muted-foreground">Funcionários Ativos</div>
+              </div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">3</div>
-              <div className="text-sm text-gray-600">Funcionários Ativos</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-destructive/10 dark:bg-destructive/20 rounded-lg">
+                <UserX className="w-5 h-5 text-destructive" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-foreground">1</div>
+                <div className="text-sm text-muted-foreground">Funcionários Inativos</div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-50 rounded-lg">
-              <UserX className="w-5 h-5 text-red-600" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-success/10 dark:bg-success/20 rounded-lg">
+                <Plus className="w-5 h-5 text-success" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-foreground">2</div>
+                <div className="text-sm text-muted-foreground">Contratados este mês</div>
+              </div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">1</div>
-              <div className="text-sm text-gray-600">Funcionários Inativos</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-warning/10 dark:bg-warning/20 rounded-lg">
+                <Edit className="w-5 h-5 text-warning" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-foreground">4</div>
+                <div className="text-sm text-muted-foreground">Departamentos</div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-50 rounded-lg">
-              <Plus className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">2</div>
-              <div className="text-sm text-gray-600">Contratados este mês</div>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-yellow-50 rounded-lg">
-              <Edit className="w-5 h-5 text-yellow-600" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">4</div>
-              <div className="text-sm text-gray-600">Departamentos</div>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Lista de funcionários */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+      <Card>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-muted border-b border-border">
               <tr>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Funcionário
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Cargo / Departamento
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Data Admissão
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Horário
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Status
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Ações
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {funcionarios.map((funcionario) => (
-                <tr key={funcionario.id} className="hover:bg-gray-50">
+                <tr key={funcionario.id} className="hover:bg-muted/50">
                   <td className="px-6 py-4">
                     <div>
-                      <div className="font-medium text-gray-900">
+                      <div className="font-medium text-foreground">
                         {funcionario.nome}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-muted-foreground">
                         {funcionario.email}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-muted-foreground">
                         {funcionario.cpf}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-foreground">
                         {funcionario.cargo}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-muted-foreground">
                         {funcionario.departamento}
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-foreground">
                     {new Date(funcionario.dataAdmissao).toLocaleDateString(
                       "pt-BR"
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-foreground">
                     {funcionario.horario}
                   </td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    <Badge
+                      variant={
                         funcionario.status === "Ativo"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
+                          ? "success"
+                          : "destructive"
+                      }
                     >
                       {funcionario.status}
-                    </span>
+                    </Badge>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <button className="text-blue-600 hover:text-blue-700">
+                      <Button variant="ghost" size="sm">
                         <Eye className="w-4 h-4" />
-                      </button>
-                      <button className="text-green-600 hover:text-green-700">
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-success hover:text-success/70">
                         <Edit className="w-4 h-4" />
-                      </button>
-                      <button className="text-red-600 hover:text-red-700">
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive/70">
                         <Trash2 className="w-4 h-4" />
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -237,31 +250,35 @@ export default function FuncionariosPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
 
       {/* Paginação */}
-      <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 px-6 py-4">
-        <div className="text-sm text-gray-600">
-          Mostrando 4 de 4 funcionários
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50"
-            disabled
-          >
-            Anterior
-          </button>
-          <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded">
-            1
-          </button>
-          <button
-            className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50"
-            disabled
-          >
-            Próximo
-          </button>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="flex items-center justify-between px-6 py-4">
+          <div className="text-sm text-muted-foreground">
+            Mostrando 4 de 4 funcionários
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled
+            >
+              Anterior
+            </Button>
+            <Button size="sm">
+              1
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled
+            >
+              Próximo
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -46,13 +46,13 @@ const activities: Activity[] = [
 const getActivityIcon = (type: Activity["type"]) => {
   switch (type) {
     case "entrada":
-      return <UserCheck className="w-4 h-4 text-green-600" />;
+      return <UserCheck className="w-4 h-4 text-green-600 dark:text-green-400" />;
     case "saida":
-      return <UserX className="w-4 h-4 text-blue-600" />;
+      return <UserX className="w-4 h-4 text-blue-600 dark:text-blue-400" />;
     case "ausencia":
-      return <UserX className="w-4 h-4 text-yellow-600" />;
+      return <UserX className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />;
     case "justificativa":
-      return <AlertTriangle className="w-4 h-4 text-red-600" />;
+      return <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />;
   }
 };
 

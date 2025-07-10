@@ -1,4 +1,8 @@
-import { Search, Filter, Download, Eye } from "lucide-react";
+import { Search, Download, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const funcionarios = [
   {
@@ -35,118 +39,125 @@ export default function JornadaPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-foreground">
             Controle de Jornada
           </h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Acompanhe a jornada de trabalho dos funcionários
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <Button className="flex items-center gap-2">
           <Download className="w-4 h-4" />
           Exportar Relatório
-        </button>
+        </Button>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar funcionário..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar funcionário..."
+                  className="pl-10"
+                />
+              </div>
             </div>
+            <select className="px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary bg-background text-foreground">
+              <option>Todos os status</option>
+              <option>Presente</option>
+              <option>Ausente</option>
+              <option>Trabalhando</option>
+            </select>
+            <Input
+              type="date"
+              defaultValue={new Date().toISOString().split("T")[0]}
+            />
           </div>
-          <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-            <option>Todos os status</option>
-            <option>Presente</option>
-            <option>Ausente</option>
-            <option>Trabalhando</option>
-          </select>
-          <input
-            type="date"
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            defaultValue={new Date().toISOString().split("T")[0]}
-          />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Tabela de funcionários */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+      <Card>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-muted border-b border-border">
               <tr>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Funcionário
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Entrada
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Saída
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Horas Trabalhadas
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Status
                 </th>
-                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Ações
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {funcionarios.map((funcionario) => (
-                <tr key={funcionario.id} className="hover:bg-gray-50">
+                <tr key={funcionario.id} className="hover:bg-muted/50">
                   <td className="px-6 py-4">
                     <div>
-                      <div className="font-medium text-gray-900">
+                      <div className="font-medium text-card-foreground">
                         {funcionario.nome}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-muted-foreground">
                         {funcionario.cargo}
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-card-foreground">
                     {funcionario.entrada}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-card-foreground">
                     {funcionario.saida}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-card-foreground">
                     {funcionario.horasTrabalhadas}
                   </td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    <Badge
+                      variant={
                         funcionario.status === "Presente"
-                          ? "bg-green-100 text-green-800"
+                          ? "default"
                           : funcionario.status === "Trabalhando"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
+                          ? "secondary"
+                          : "destructive"
+                      }
+                      className={
+                        funcionario.status === "Presente"
+                          ? "bg-green-100 text-green-800 dark:bg-green-950/50 dark:text-green-400"
+                          : funcionario.status === "Trabalhando"
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-400"
+                          : undefined
+                      }
                     >
                       {funcionario.status}
-                    </span>
+                    </Badge>
                   </td>
                   <td className="px-6 py-4">
-                    <button className="text-blue-600 hover:text-blue-700">
+                    <Button variant="ghost" size="icon">
                       <Eye className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
