@@ -1,28 +1,25 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Clock,
-  UserX,
-  Calendar,
-  MessageSquare,
-  FileText,
-  Users,
-} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarProvider,
-  SidebarTrigger,
+  SidebarMenuItem
 } from "@/components/ui/sidebar";
+import {
+  Calendar,
+  Clock,
+  FileText,
+  LayoutDashboard,
+  MessageSquare,
+  Users,
+  UserX,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const menuItems = [
   {

@@ -1,12 +1,11 @@
 "use client";
 
+import {
+  SidebarInset,
+  SidebarProvider
+} from "@/components/ui/sidebar";
 import Navbar from "./Navbar";
 import AppSidebar from "./Sidebar";
-import {
-  SidebarProvider,
-  SidebarInset,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
 
 interface EmpresaLayoutProps {
   children: React.ReactNode;
