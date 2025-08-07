@@ -5,21 +5,51 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Bell, LogOut, Settings, User } from "lucide-react";
+import { usePathname } from "next/navigation";
+
+const getPageTitle = (pathname: string) => {
+  switch (pathname) {
+    case "/empresa":
+      return "Dashboard";
+    case "/empresa/funcionarios":
+      return "Funcionários";
+    case "/empresa/jornada":
+      return "Controle de Jornada";
+    case "/empresa/ausencias":
+      return "Ausências";
+    case "/empresa/ferias":
+      return "Gestão de Férias";
+    case "/empresa/justificativas":
+      return "Justificativas";
+    case "/empresa/relatorio-contador":
+      return "Relatório Contador";
+    case "/empresa/tema":
+      return "Tema";
+    default:
+      return "";
+  }
+};
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const pageTitle = getPageTitle(pathname);
+
   return (
     <nav className="border-b bg-background px-4 py-3">
       <div className="flex items-center justify-between">
-        <div className="flex items-center">
+        <div className="flex items-center gap-4">
           <SidebarTrigger />
+          {pageTitle && (
+            <h1 className="text-xl font-semibold text-foreground">{pageTitle}</h1>
+          )}
         </div>
 
         <div className="flex items-center gap-4">
