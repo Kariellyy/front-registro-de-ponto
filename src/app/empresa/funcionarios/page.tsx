@@ -1,6 +1,7 @@
 "use client";
 
 import { CreateFuncionarioModal } from "@/components/funcionarios/CreateFuncionarioModal";
+import { DepartamentoModal } from "@/components/funcionarios/DepartamentoModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,21 +12,26 @@ import { Funcionario } from "@/types";
 import {
     AlertCircle,
     Edit,
-    Eye,
     Plus,
     RefreshCw,
     Search,
     Trash2,
     UserCheck,
-    UserX,
+    UserX
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function FuncionariosPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartamento, setSelectedDepartamento] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDepartamentoModalOpen, setIsDepartamentoModalOpen] = useState(false);
+  const [selectedFuncionario, setSelectedFuncionario] = useState<Funcionario | null>(null);
+  const [departamentosCompartilhados, setDepartamentosCompartilhados] = useState<string[]>([
+    "Tecnologia", "Produto", "Gestão", "Marketing", "Vendas", "Financeiro", "Recursos Humanos"
+  ]);
   
   const { 
     funcionarios, 
@@ -65,14 +71,18 @@ export default function FuncionariosPage() {
   const stats = useMemo(() => {
     const ativos = funcionarios.filter(f => f.ativo).length;
     const inativos = funcionarios.filter(f => !f.ativo).length;
-    const thisMonth = new Date();
-    thisMonth.setDate(1);
-    const contratadosEsteMes = funcionarios.filter(f => 
-      new Date(f.dataAdmissao) >= thisMonth
-    ).length;
     const departamentos = new Set(funcionarios.map(f => f.departamento)).size;
 
-    return { ativos, inativos, contratadosEsteMes, departamentos };
+    return { ativos, inativos, departamentos };
+  }, [funcionarios]);
+
+  // Atualizar departamentos compartilhados quando funcionários mudarem
+  useEffect(() => {
+    const departamentosExistentes = Array.from(new Set(funcionarios.map(f => f.departamento)));
+    setDepartamentosCompartilhados(prev => {
+      const todos = [...new Set([...prev, ...departamentosExistentes])];
+      return todos.filter((dept, index, arr) => arr.indexOf(dept) === index);
+    });
   }, [funcionarios]);
 
   const handleStatusToggle = async (funcionario: Funcionario) => {
@@ -96,6 +106,11 @@ export default function FuncionariosPage() {
 
   const handleCreateSuccess = () => {
     refresh();
+  };
+
+  const handleEdit = (funcionario: Funcionario) => {
+    setSelectedFuncionario(funcionario);
+    setIsEditModalOpen(true);
   };
 
   const formatHorario = (horarioTrabalho: Funcionario['horarioTrabalho']) => {
@@ -140,6 +155,13 @@ export default function FuncionariosPage() {
           />
         </div>
         <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setIsDepartamentoModalOpen(true)}
+          >
+            Gerenciar Departamentos
+          </Button>
           <Button className="flex items-center gap-2" onClick={() => setIsCreateModalOpen(true)}>
             <Plus className="w-4 h-4" />
             Novo Funcionário
@@ -149,8 +171,8 @@ export default function FuncionariosPage() {
 
       {/* Estatísticas rápidas */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
             <Card key={i}>
               <CardContent className="p-4">
                 <div className="h-16 bg-gray-200 rounded animate-pulse" />
@@ -159,7 +181,7 @@ export default function FuncionariosPage() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -186,19 +208,7 @@ export default function FuncionariosPage() {
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 dark:bg-green-950/50 rounded-lg">
-                  <Plus className="w-5 h-5 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-foreground">{stats.contratadosEsteMes}</div>
-                  <div className="text-sm text-muted-foreground">Contratados este mês</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -291,10 +301,13 @@ export default function FuncionariosPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" title="Visualizar">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-600/70" title="Editar">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-blue-600 hover:text-blue-600/70" 
+                          title="Editar"
+                          onClick={() => handleEdit(funcionario)}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button 
@@ -334,6 +347,36 @@ export default function FuncionariosPage() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleCreateSuccess}
+        departamentos={departamentosCompartilhados}
+      />
+
+      {/* Modal de Edição */}
+      {selectedFuncionario && (
+        <CreateFuncionarioModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedFuncionario(null);
+          }}
+          onSuccess={handleCreateSuccess}
+          funcionario={selectedFuncionario}
+          isEditing={true}
+          departamentos={departamentosCompartilhados}
+        />
+      )}
+
+      {/* Modal de Gerenciamento de Departamentos */}
+      <DepartamentoModal
+        isOpen={isDepartamentoModalOpen}
+        onClose={() => setIsDepartamentoModalOpen(false)}
+        departamentos={departamentosCompartilhados}
+        funcionarios={funcionarios}
+        onDepartamentoAdded={(departamento) => {
+          setDepartamentosCompartilhados(prev => [...prev, departamento]);
+        }}
+        onDepartamentoRemoved={(departamento) => {
+          setDepartamentosCompartilhados(prev => prev.filter(d => d !== departamento));
+        }}
       />
     </div>
   );

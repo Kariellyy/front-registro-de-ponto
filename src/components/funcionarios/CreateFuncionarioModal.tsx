@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
 import { useFuncionarioActions } from "@/hooks/use-funcionarios";
-import { CreateFuncionarioRequest } from "@/services/funcionarios.service";
+import { CreateFuncionarioRequest, UpdateFuncionarioRequest } from "@/services/funcionarios.service";
+import { Funcionario } from "@/types";
 import { Plus, Trash2, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 const formatCPF = (value: string) => {
@@ -23,6 +24,9 @@ interface CreateFuncionarioModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  funcionario?: Funcionario;
+  isEditing?: boolean;
+  departamentos?: string[];
 }
 
 interface FormData {
@@ -42,8 +46,8 @@ interface DepartamentoFormData {
   nome: string;
 }
 
-export function CreateFuncionarioModal({ isOpen, onClose, onSuccess }: CreateFuncionarioModalProps) {
-  const { createFuncionario, loading, error } = useFuncionarioActions();
+export function CreateFuncionarioModal({ isOpen, onClose, onSuccess, funcionario, isEditing = false, departamentos: propDepartamentos }: CreateFuncionarioModalProps) {
+  const { createFuncionario, updateFuncionario, loading, error } = useFuncionarioActions();
   const [intervalos, setIntervalos] = useState([{ inicio: "00:00", fim: "00:00" }]);
   const [departamentos, setDepartamentos] = useState([
     "Tecnologia", "Produto", "Gestão", "Marketing", "Vendas", "Financeiro", "Recursos Humanos"
@@ -55,6 +59,7 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess }: CreateFun
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
@@ -62,6 +67,36 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess }: CreateFun
       saida: "00:00",
     }
   });
+
+  // Atualizar departamentos quando receber novos dados
+  useEffect(() => {
+    if (propDepartamentos) {
+      // Remover duplicatas antes de atualizar
+      const departamentosUnicos = [...new Set(propDepartamentos)];
+      setDepartamentos(departamentosUnicos);
+    }
+  }, [propDepartamentos]);
+
+  // Preencher formulário quando estiver editando
+  useEffect(() => {
+    if (isEditing && funcionario) {
+      setValue("nome", funcionario.nome);
+      setValue("cpf", funcionario.cpf);
+      setValue("email", funcionario.email);
+      setValue("telefone", funcionario.telefone);
+      setValue("cargo", funcionario.cargo);
+      setValue("departamento", funcionario.departamento);
+      setValue("dataAdmissao", new Date(funcionario.dataAdmissao).toISOString().split('T')[0]);
+      setValue("entrada", funcionario.horarioTrabalho.entrada);
+      setValue("saida", funcionario.horarioTrabalho.saida);
+      setIntervalos(funcionario.horarioTrabalho.intervalos.length > 0 ? funcionario.horarioTrabalho.intervalos : [{ inicio: "00:00", fim: "00:00" }]);
+      
+      // Adicionar o departamento do funcionário se não existir na lista
+      if (!departamentos.includes(funcionario.departamento)) {
+        setDepartamentos(prev => [...prev, funcionario.departamento]);
+      }
+    }
+  }, [isEditing, funcionario, setValue, departamentos]);
 
   const {
     register: registerDepartamento,
@@ -94,31 +129,59 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess }: CreateFun
   };
 
   const onSubmit = async (data: FormData) => {
-    const funcionarioData: CreateFuncionarioRequest = {
-      nome: data.nome,
-      cpf: data.cpf,
-      email: data.email,
-      telefone: data.telefone,
-      cargo: data.cargo,
-      departamento: data.departamento,
-      dataAdmissao: data.dataAdmissao,
-      ativo: true,
-      horarioTrabalho: {
-        entrada: data.entrada,
-        saida: data.saida,
-        intervalos: intervalos.filter(i => i.inicio && i.fim),
-      },
-    };
+    if (isEditing && funcionario) {
+      const funcionarioData: UpdateFuncionarioRequest = {
+        nome: data.nome,
+        cpf: data.cpf,
+        email: data.email,
+        telefone: data.telefone,
+        cargo: data.cargo,
+        departamento: data.departamento,
+        dataAdmissao: data.dataAdmissao,
+        horarioTrabalho: {
+          entrada: data.entrada,
+          saida: data.saida,
+          intervalos: intervalos.filter(i => i.inicio && i.fim),
+        },
+      };
 
-    const result = await createFuncionario(funcionarioData);
-    if (result) {
-      toast.success("Funcionário criado com sucesso!");
-      reset();
-      setIntervalos([{ inicio: "00:00", fim: "00:00" }]);
-      onSuccess();
-      onClose();
+      const result = await updateFuncionario(funcionario.id, funcionarioData);
+      if (result) {
+        toast.success("Funcionário atualizado com sucesso!");
+        reset();
+        setIntervalos([{ inicio: "00:00", fim: "00:00" }]);
+        onSuccess();
+        onClose();
+      } else {
+        toast.error("Erro ao atualizar funcionário. Tente novamente.");
+      }
     } else {
-      toast.error("Erro ao criar funcionário. Tente novamente.");
+      const funcionarioData: CreateFuncionarioRequest = {
+        nome: data.nome,
+        cpf: data.cpf,
+        email: data.email,
+        telefone: data.telefone,
+        cargo: data.cargo,
+        departamento: data.departamento,
+        dataAdmissao: data.dataAdmissao,
+        ativo: true,
+        horarioTrabalho: {
+          entrada: data.entrada,
+          saida: data.saida,
+          intervalos: intervalos.filter(i => i.inicio && i.fim),
+        },
+      };
+
+      const result = await createFuncionario(funcionarioData);
+      if (result) {
+        toast.success("Funcionário criado com sucesso!");
+        reset();
+        setIntervalos([{ inicio: "00:00", fim: "00:00" }]);
+        onSuccess();
+        onClose();
+      } else {
+        toast.error("Erro ao criar funcionário. Tente novamente.");
+      }
     }
   };
 
@@ -136,7 +199,7 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess }: CreateFun
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Novo Funcionário</CardTitle>
+          <CardTitle>{isEditing ? "Editar Funcionário" : "Novo Funcionário"}</CardTitle>
           <Button variant="ghost" size="sm" onClick={handleClose}>
             <X className="w-4 h-4" />
           </Button>
@@ -253,8 +316,8 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess }: CreateFun
                       className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <option value="">Selecione um departamento</option>
-                      {departamentos.map((dept) => (
-                        <option key={dept} value={dept}>{dept}</option>
+                      {departamentos.map((dept, index) => (
+                        <option key={`${dept}-${index}`} value={dept}>{dept}</option>
                       ))}
                     </select>
                     <Button
@@ -365,7 +428,7 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess }: CreateFun
                 Cancelar
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? "Criando..." : "Criar Funcionário"}
+                {loading ? (isEditing ? "Atualizando..." : "Criando...") : (isEditing ? "Atualizar Funcionário" : "Criar Funcionário")}
               </Button>
             </div>
           </form>
