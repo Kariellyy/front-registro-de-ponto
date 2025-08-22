@@ -1,8 +1,8 @@
-import { Search, Plus, Calendar, Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Calendar, Eye, Plus, Search } from "lucide-react";
 
 const ferias = [
   {
@@ -48,12 +48,7 @@ export default function FeriasPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Gestão de Férias</h1>
-          <p className="text-muted-foreground">
-            Controle os períodos de férias dos funcionários
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold text-foreground">Gestão de Férias</h1>
         <Button className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Agendar Férias

@@ -1,55 +1,69 @@
 "use client";
 
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Bell, LogOut, Settings, User } from "lucide-react";
+import { Bell, ChevronRight, Home } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const getPageTitle = (pathname: string) => {
-  switch (pathname) {
-    case "/empresa":
-      return "Dashboard";
-    case "/empresa/funcionarios":
-      return "Funcionários";
-    case "/empresa/jornada":
-      return "Controle de Jornada";
-    case "/empresa/ausencias":
-      return "Ausências";
-    case "/empresa/ferias":
-      return "Gestão de Férias";
-    case "/empresa/justificativas":
-      return "Justificativas";
-    case "/empresa/relatorio-contador":
-      return "Relatório Contador";
-    case "/empresa/tema":
-      return "Tema";
-    default:
-      return "";
+const getBreadcrumbItems = (pathname: string) => {
+  const segments = pathname.split('/').filter(Boolean);
+  const items = [
+    { label: 'Home', href: '/empresa', icon: Home }
+  ];
+
+  if (segments.length > 1) {
+    const currentPage = segments[1];
+    const pageLabels: { [key: string]: string } = {
+      'funcionarios': 'Funcionários',
+      'jornada': 'Controle de Jornada',
+      'ausencias': 'Ausências',
+      'ferias': 'Gestão de Férias',
+      'justificativas': 'Justificativas',
+      'relatorio-contador': 'Relatório Contador',
+      'tema': 'Tema'
+    };
+
+    if (pageLabels[currentPage]) {
+      items.push({
+        label: pageLabels[currentPage],
+        href: `/${segments.slice(0, 2).join('/')}`,
+        icon: null
+      });
+    }
   }
+
+  return items;
 };
 
 export default function Navbar() {
   const pathname = usePathname();
-  const pageTitle = getPageTitle(pathname);
+  const breadcrumbItems = getBreadcrumbItems(pathname);
 
   return (
     <nav className="border-b bg-background px-4 py-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <SidebarTrigger />
-          {pageTitle && (
-            <h1 className="text-xl font-semibold text-foreground">{pageTitle}</h1>
-          )}
+          
+          <nav className="flex items-center space-x-1 text-sm text-muted-foreground">
+            {breadcrumbItems.map((item, index) => (
+              <div key={item.href} className="flex items-center">
+                {index > 0 && <ChevronRight className="w-4 h-4 mx-1" />}
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-1 hover:text-foreground transition-colors ${
+                    index === breadcrumbItems.length - 1 ? 'text-foreground font-medium' : ''
+                  }`}
+                >
+                  {item.icon && <item.icon className="w-4 h-4" />}
+                  {item.label}
+                </Link>
+              </div>
+            ))}
+          </nav>
         </div>
 
         <div className="flex items-center gap-4">
@@ -64,30 +78,6 @@ export default function Navbar() {
           </Button>
 
           <ThemeToggle />
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback>
-                    <User className="w-4 h-4" />
-                  </AvatarFallback>
-                </Avatar>
-                <span className="font-medium">Admin</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem>
-                <Settings className="w-4 h-4 mr-2" />
-                Configurações
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
-                <LogOut className="w-4 h-4 mr-2" />
-                Sair
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
     </nav>

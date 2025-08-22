@@ -48,7 +48,7 @@ interface DepartamentoFormData {
 
 export function CreateFuncionarioModal({ isOpen, onClose, onSuccess, funcionario, isEditing = false, departamentos: propDepartamentos }: CreateFuncionarioModalProps) {
   const { createFuncionario, updateFuncionario, loading, error } = useFuncionarioActions();
-  const [intervalos, setIntervalos] = useState([{ inicio: "00:00", fim: "00:00" }]);
+  const [intervalos, setIntervalos] = useState([{ inicio: "--", fim: "--" }]);
   const [departamentos, setDepartamentos] = useState([
     "Tecnologia", "Produto", "Gestão", "Marketing", "Vendas", "Financeiro", "Recursos Humanos"
   ]);
@@ -63,8 +63,8 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess, funcionario
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
-      entrada: "00:00",
-      saida: "00:00",
+          entrada: "--",
+    saida: "--",
     }
   });
 
@@ -89,7 +89,7 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess, funcionario
       setValue("dataAdmissao", new Date(funcionario.dataAdmissao).toISOString().split('T')[0]);
       setValue("entrada", funcionario.horarioTrabalho.entrada);
       setValue("saida", funcionario.horarioTrabalho.saida);
-      setIntervalos(funcionario.horarioTrabalho.intervalos.length > 0 ? funcionario.horarioTrabalho.intervalos : [{ inicio: "00:00", fim: "00:00" }]);
+      setIntervalos(funcionario.horarioTrabalho.intervalos.length > 0 ? funcionario.horarioTrabalho.intervalos : [{ inicio: "--", fim: "--" }]);
       
       // Adicionar o departamento do funcionário se não existir na lista
       if (!departamentos.includes(funcionario.departamento)) {
@@ -149,7 +149,7 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess, funcionario
       if (result) {
         toast.success("Funcionário atualizado com sucesso!");
         reset();
-        setIntervalos([{ inicio: "00:00", fim: "00:00" }]);
+        setIntervalos([{ inicio: "--", fim: "--" }]);
         onSuccess();
         onClose();
       } else {
@@ -176,7 +176,7 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess, funcionario
       if (result) {
         toast.success("Funcionário criado com sucesso!");
         reset();
-        setIntervalos([{ inicio: "00:00", fim: "00:00" }]);
+        setIntervalos([{ inicio: "--", fim: "--" }]);
         onSuccess();
         onClose();
       } else {
@@ -187,7 +187,7 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess, funcionario
 
   const handleClose = () => {
     reset();
-    setIntervalos([{ inicio: "00:00", fim: "00:00" }]);
+    setIntervalos([{ inicio: "--", fim: "--" }]);
     onClose();
   };
 
@@ -359,6 +359,7 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess, funcionario
                   <Input
                     id="entrada"
                     type="time"
+                    placeholder="--"
                     {...register("entrada", { required: "Horário de entrada é obrigatório" })}
                   />
                   {errors.entrada && (
@@ -371,6 +372,7 @@ export function CreateFuncionarioModal({ isOpen, onClose, onSuccess, funcionario
                   <Input
                     id="saida"
                     type="time"
+                    placeholder="--"
                     {...register("saida", { required: "Horário de saída é obrigatório" })}
                   />
                   {errors.saida && (

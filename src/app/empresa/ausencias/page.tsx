@@ -1,8 +1,8 @@
-import { Search, Plus, Eye, Check, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Check, Eye, Plus, Search, X } from "lucide-react";
 
 const ausencias = [
   {
@@ -41,14 +41,9 @@ export default function AusenciasPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Controle de Ausências
-          </h1>
-          <p className="text-muted-foreground">
-            Gerencie as solicitações de ausências dos funcionários
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold text-foreground">
+          Controle de Ausências
+        </h1>
         <Button className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Nova Ausência
@@ -136,9 +131,9 @@ export default function AusenciasPage() {
                     <Badge
                       variant={
                         ausencia.status === "pendente"
-                          ? "warning"
+                          ? "secondary"
                           : ausencia.status === "aprovada"
-                          ? "success"
+                          ? "default"
                           : "destructive"
                       }
                     >

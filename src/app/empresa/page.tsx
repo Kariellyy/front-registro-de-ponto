@@ -1,22 +1,21 @@
-import {
-  Users,
-  UserCheck,
-  UserX,
-  Clock,
-  AlertTriangle,
-  Calendar,
-} from "lucide-react";
+import AttendanceChart from "@/components/dashboard/AttendanceChart";
 import MetricCard from "@/components/dashboard/MetricCard";
 import RecentActivity from "@/components/dashboard/RecentActivity";
-import AttendanceChart from "@/components/dashboard/AttendanceChart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    AlertTriangle,
+    Calendar,
+    Clock,
+    UserCheck,
+    Users,
+    UserX,
+} from "lucide-react";
 
 export default function EmpresaDashboard() {
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Visão geral do sistema de ponto</p>
       </div>
 
       {/* Métricas principais */}

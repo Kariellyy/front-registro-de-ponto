@@ -1,8 +1,8 @@
-import { Search, Download, Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Download, Eye, Search } from "lucide-react";
 
 const funcionarios = [
   {
@@ -38,14 +38,9 @@ export default function JornadaPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Controle de Jornada
-          </h1>
-          <p className="text-muted-foreground">
-            Acompanhe a jornada de trabalho dos funcionários
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold text-foreground">
+          Controle de Jornada
+        </h1>
         <Button className="flex items-center gap-2">
           <Download className="w-4 h-4" />
           Exportar Relatório

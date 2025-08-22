@@ -1,8 +1,8 @@
-import { Search, Filter, Check, X, Eye, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Check, Download, Eye, Search, X } from "lucide-react";
 
 const justificativas = [
   {
@@ -38,14 +38,9 @@ export default function JustificativasPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Justificativas de Pontos
-          </h1>
-          <p className="text-muted-foreground">
-            Gerencie as solicitações de justificativas dos funcionários
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold text-foreground">
+          Justificativas de Pontos
+        </h1>
         <Button className="flex items-center gap-2">
           <Download className="w-4 h-4" />
           Exportar Relatório
@@ -93,9 +88,9 @@ export default function JustificativasPage() {
                     <Badge
                       variant={
                         justificativa.status === "pendente"
-                          ? "warning"
+                          ? "secondary"
                           : justificativa.status === "aprovada"
-                          ? "success"
+                          ? "default"
                           : "destructive"
                       }
                     >

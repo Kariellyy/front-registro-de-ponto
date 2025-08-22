@@ -10,14 +10,14 @@ import { LoadingTable } from "@/components/ui/loading";
 import { useFuncionarioActions, useFuncionarios } from "@/hooks/use-funcionarios";
 import { Funcionario } from "@/types";
 import {
-    AlertCircle,
-    Edit,
-    Plus,
-    RefreshCw,
-    Search,
-    Trash2,
-    UserCheck,
-    UserX
+  AlertCircle,
+  Edit,
+  Plus,
+  RefreshCw,
+  Search,
+  Trash2,
+  UserCheck,
+  UserX
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -36,10 +36,7 @@ export default function FuncionariosPage() {
   const { 
     funcionarios, 
     loading, 
-    error, 
-    pagination, 
-    updateFilters, 
-    changePage, 
+    error,
     refresh 
   } = useFuncionarios({ 
     limit: 10,
@@ -145,15 +142,7 @@ export default function FuncionariosPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar funcionário por nome..."
-            className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+        <h1 className="text-2xl font-bold text-foreground">Funcionários</h1>
         <div className="flex items-center gap-2">
           <Button 
             variant="outline" 
@@ -166,6 +155,18 @@ export default function FuncionariosPage() {
             <Plus className="w-4 h-4" />
             Novo Funcionário
           </Button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar funcionário por nome..."
+            className="pl-10"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
 
