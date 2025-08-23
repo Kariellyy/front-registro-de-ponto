@@ -59,7 +59,7 @@
   --radius: 0.625rem;
   
   /* Tema claro */
-  --background: oklch(0.99 0.01 240);
+  --background: #ffffff;
   --foreground: oklch(0.15 0.05 240);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.15 0.05 240);
@@ -96,7 +96,7 @@
   --chart-5: oklch(0.55 0.18 210);
   
   /* Sidebar */
-  --sidebar: oklch(0.98 0.01 240);
+  --sidebar: color-mix(in oklab, oklch(0.98 0 0 / 1) 50%, transparent);
   --sidebar-foreground: oklch(0.15 0.05 240);
   --sidebar-primary: var(--company-primary);
   --sidebar-primary-foreground: oklch(0.98 0.02 240);
