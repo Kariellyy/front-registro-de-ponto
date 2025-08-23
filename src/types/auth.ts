@@ -1,0 +1,57 @@
+export interface Usuario {
+  id: string;
+  nome: string;
+  email: string;
+  papel: 'dono' | 'administrador' | 'funcionario';
+  empresaId: string;
+  telefone?: string;
+  photoUrl?: string;
+  status: 'ativo' | 'inativo' | 'suspenso';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Empresa {
+  id: string;
+  nome: string;
+  cnpj: string;
+  email: string;
+  telefone?: string;
+  endereco?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  nome: string;
+  email: string;
+  password: string;
+  nomeEmpresa: string;
+  cnpj: string;
+  emailEmpresa: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  user: Usuario;
+  empresa: Empresa;
+}
+
+export interface RegisterResponse {
+  message: string;
+  user: Usuario;
+  empresa: Empresa;
+}
+
+export interface AuthUser {
+  id: string;
+  nome: string;
+  email: string;
+  papel: 'dono' | 'administrador' | 'funcionario';
+  empresa: Empresa;
+}

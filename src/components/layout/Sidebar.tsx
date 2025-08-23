@@ -30,6 +30,7 @@ import {
     Users,
     UserX,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -79,10 +80,14 @@ export default function AppSidebar() {
       <SidebarContent>
         <div className="px-4 py-4 border-b">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">
-                RP
-              </span>
+            <div className="w-8 h-8 flex items-center justify-center">
+              <Image
+                src="/logo.png"
+                alt="RPonto"
+                width={50}
+                height={50}
+                className="w-8"
+              />
             </div>
             <h1 className="text-xl font-semibold">Registro de Ponto</h1>
           </div>

@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api';
+import { api } from '@/lib/api';
 import { Funcionario } from '@/types';
 
 export interface CreateFuncionarioRequest {
@@ -54,57 +54,57 @@ export class FuncionariosService {
     const queryString = searchParams.toString();
     const endpoint = queryString ? `${this.basePath}?${queryString}` : this.basePath;
     
-    return apiClient.get<FuncionariosListResponse>(endpoint);
+    return api.get<FuncionariosListResponse>(endpoint);
   }
 
   async getById(id: string): Promise<Funcionario> {
-    return apiClient.get<Funcionario>(`${this.basePath}/${id}`);
+    return api.get<Funcionario>(`${this.basePath}/${id}`);
   }
 
   async getByCpf(cpf: string): Promise<Funcionario> {
-    return apiClient.get<Funcionario>(`${this.basePath}/cpf/${cpf}`);
+    return api.get<Funcionario>(`${this.basePath}/cpf/${cpf}`);
   }
 
   async getByEmail(email: string): Promise<Funcionario> {
-    return apiClient.get<Funcionario>(`${this.basePath}/email/${email}`);
+    return api.get<Funcionario>(`${this.basePath}/email/${email}`);
   }
 
   async getByDepartamento(departamento: string, ativo = true): Promise<Funcionario[]> {
     const params = new URLSearchParams({ ativo: ativo.toString() });
-    return apiClient.get<Funcionario[]>(`${this.basePath}/departamento/${departamento}?${params}`);
+    return api.get<Funcionario[]>(`${this.basePath}/departamento/${departamento}?${params}`);
   }
 
   async getByCargo(cargo: string, ativo = true): Promise<Funcionario[]> {
     const params = new URLSearchParams({ ativo: ativo.toString() });
-    return apiClient.get<Funcionario[]>(`${this.basePath}/cargo/${cargo}?${params}`);
+    return api.get<Funcionario[]>(`${this.basePath}/cargo/${cargo}?${params}`);
   }
 
   async create(data: CreateFuncionarioRequest): Promise<Funcionario> {
-    return apiClient.post<Funcionario>(this.basePath, data);
+    return api.post<Funcionario>(this.basePath, data);
   }
 
   async update(id: string, data: UpdateFuncionarioRequest): Promise<Funcionario> {
-    return apiClient.patch<Funcionario>(`${this.basePath}/${id}`, data);
+    return api.patch<Funcionario>(`${this.basePath}/${id}`, data);
   }
 
   async delete(id: string): Promise<void> {
-    return apiClient.delete<void>(`${this.basePath}/${id}`);
+    return api.delete<void>(`${this.basePath}/${id}`);
   }
 
   async activate(id: string): Promise<Funcionario> {
-    return apiClient.patch<Funcionario>(`${this.basePath}/${id}/ativar`, {});
+    return api.patch<Funcionario>(`${this.basePath}/${id}/ativar`, {});
   }
 
   async deactivate(id: string): Promise<Funcionario> {
-    return apiClient.patch<Funcionario>(`${this.basePath}/${id}/desativar`, {});
+    return api.patch<Funcionario>(`${this.basePath}/${id}/desativar`, {});
   }
 
   async getStatisticsByDepartamento(): Promise<{ departamento: string; total: number }[]> {
-    return apiClient.get<{ departamento: string; total: number }[]>(`${this.basePath}/estatisticas/departamentos`);
+    return api.get<{ departamento: string; total: number }[]>(`${this.basePath}/estatisticas/departamentos`);
   }
 
   async getStatisticsByCargo(): Promise<{ cargo: string; total: number }[]> {
-    return apiClient.get<{ cargo: string; total: number }[]>(`${this.basePath}/estatisticas/cargos`);
+    return api.get<{ cargo: string; total: number }[]>(`${this.basePath}/estatisticas/cargos`);
   }
 }
 

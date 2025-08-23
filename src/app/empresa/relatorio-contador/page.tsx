@@ -116,35 +116,35 @@ export default function RelatorioContadorPage() {
       {/* Resumo do período */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center relative">
-          <div className="absolute top-0 left-0 w-1 h-full bg-slate-400 rounded-l-lg"></div>
+          <div className="absolute top-0 left-0 w-1 h-full rounded-l-lg" style={{backgroundColor: '#5baca3'}}></div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {relatorioMensal.totalFuncionarios}
           </div>
           <div className="text-sm text-gray-700 dark:text-gray-300">Funcionários</div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center relative">
-          <div className="absolute top-0 left-0 w-1 h-full bg-emerald-400 rounded-l-lg"></div>
+          <div className="absolute top-0 left-0 w-1 h-full rounded-l-lg" style={{backgroundColor: '#5baca3'}}></div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {relatorioMensal.horasRegulares}h
           </div>
           <div className="text-sm text-gray-700 dark:text-gray-300">Horas Regulares</div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center relative">
-          <div className="absolute top-0 left-0 w-1 h-full bg-blue-400 rounded-l-lg"></div>
+          <div className="absolute top-0 left-0 w-1 h-full rounded-l-lg" style={{backgroundColor: '#5baca3'}}></div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {relatorioMensal.horasExtras}h
           </div>
           <div className="text-sm text-gray-700 dark:text-gray-300">Horas Extras</div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center relative">
-          <div className="absolute top-0 left-0 w-1 h-full bg-amber-400 rounded-l-lg"></div>
+          <div className="absolute top-0 left-0 w-1 h-full rounded-l-lg" style={{backgroundColor: '#5baca3'}}></div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {relatorioMensal.horasDebito}h
           </div>
           <div className="text-sm text-gray-700 dark:text-gray-300">Horas Débito</div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center relative">
-          <div className="absolute top-0 left-0 w-1 h-full bg-indigo-400 rounded-l-lg"></div>
+          <div className="absolute top-0 left-0 w-1 h-full rounded-l-lg" style={{backgroundColor: '#5baca3'}}></div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {relatorioMensal.saldoBancoHoras}h
           </div>
