@@ -134,9 +134,16 @@ export default function FuncionariosPage() {
     setIsEditModalOpen(true);
   };
 
-  const formatHorario = (horarioTrabalho: Funcionario["horarioTrabalho"]) => {
-    if (!horarioTrabalho) return "Não definido";
-    return `${horarioTrabalho.entrada} - ${horarioTrabalho.saida}`;
+  const formatHorario = (
+    horariosFuncionario: Funcionario["horariosFuncionario"],
+    cargaHorariaSemanal?: number
+  ) => {
+    if (!horariosFuncionario || !cargaHorariaSemanal) return "Não definido";
+
+    const diasAtivos = Object.values(horariosFuncionario).filter(
+      (h) => h.ativo
+    ).length;
+    return `${cargaHorariaSemanal}h/sem (${diasAtivos} dias)`;
   };
 
   if (error) {
@@ -391,7 +398,10 @@ export default function FuncionariosPage() {
                           : "Não informado"}
                       </td>
                       <td className="px-6 py-4 text-sm text-foreground">
-                        {formatHorario(funcionario.horarioTrabalho)}
+                        {formatHorario(
+                          funcionario.horariosFuncionario,
+                          funcionario.cargaHorariaSemanal
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <Badge

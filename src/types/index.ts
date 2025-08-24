@@ -13,11 +13,17 @@ export interface Funcionario {
     descricao?: string;
   };
   dataAdmissao?: string;
-  horarioTrabalho?: {
-    entrada: string;
-    saida: string;
-    intervalos: { inicio: string; fim: string }[];
+  horariosFuncionario?: {
+    [diaSemana: string]: {
+      ativo: boolean;
+      inicio: string;
+      fim: string;
+      temIntervalo: boolean;
+      intervaloInicio?: string;
+      intervaloFim?: string;
+    };
   };
+  cargaHorariaSemanal?: number;
   papel: "dono" | "administrador" | "funcionario";
   status: "ativo" | "inativo" | "suspenso";
   empresaId: string;

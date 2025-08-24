@@ -11,11 +11,17 @@ export interface CreateFuncionarioRequest {
   cargo?: string;
   departamentoId?: string;
   dataAdmissao?: string;
-  horarioTrabalho?: {
-    entrada: string;
-    saida: string;
-    intervalos: { inicio: string; fim: string }[];
+  horariosFuncionario?: {
+    [diaSemana: string]: {
+      ativo: boolean;
+      inicio: string;
+      fim: string;
+      temIntervalo: boolean;
+      intervaloInicio?: string;
+      intervaloFim?: string;
+    };
   };
+  cargaHorariaSemanal?: number;
   papel?: "funcionario" | "administrador";
 }
 

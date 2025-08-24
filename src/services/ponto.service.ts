@@ -2,11 +2,8 @@ import { api } from "@/lib/api";
 
 export interface RegistrarPontoRequest {
   tipo: "entrada" | "saida" | "intervalo_inicio" | "intervalo_fim";
-  latitude?: number;
-  longitude?: number;
-  endereco?: string;
-  precisao?: number;
-  dentroDoRaio?: boolean;
+  latitude: number;
+  longitude: number;
   observacoes?: string;
 }
 
@@ -17,8 +14,6 @@ export interface RegistroPonto {
   dataHora: string;
   latitude?: number;
   longitude?: number;
-  endereco?: string;
-  precisao?: number;
   dentroDoRaio: boolean;
   observacoes?: string;
   createdAt: string;
@@ -34,6 +29,10 @@ export interface BancoHoras {
   horasTrabalhadas: number;
   horasPrevistas: number;
   saldoTotal: number;
+  diasTrabalhados: number;
+  diasUteis: number;
+  horasSemanais: number;
+  semanasTrabalhadas: number;
 }
 
 export class PontoService {
@@ -68,4 +67,3 @@ export class PontoService {
 }
 
 export const pontoService = new PontoService();
-

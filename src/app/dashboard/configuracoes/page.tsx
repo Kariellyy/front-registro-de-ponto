@@ -1,6 +1,7 @@
 "use client";
 
 import GoogleMapsSelector from "@/components/empresa/GoogleMapsSelector";
+import { HorariosSemanaConfig } from "@/components/empresa/HorariosSemanaConfig";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,9 +10,20 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFormattedInput } from "@/hooks/use-formatted-input";
-import { Building, Clock, Save, Settings } from "lucide-react";
+import { gerarHorariosPadrao } from "@/lib/horarios";
+import { empresasService } from "@/services/empresas.service";
+import { Building, Save, Settings } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+
+interface HorarioDia {
+  ativo: boolean;
+  inicio: string;
+  fim: string;
+  temIntervalo: boolean;
+  intervaloInicio?: string;
+  intervaloFim?: string;
+}
 
 interface EmpresaForm {
   nome: string;
@@ -22,17 +34,15 @@ interface EmpresaForm {
   latitude?: number;
   longitude?: number;
   raioPermitido: number;
-  // Configurações de horário
-  horarioInicioManha: string;
-  horarioFimManha: string;
-  horarioInicioTarde: string;
-  horarioFimTarde: string;
+
   // Tolerâncias
   toleranciaEntrada: number;
   toleranciaSaida: number;
   // Configurações de flexibilidade
   permitirRegistroForaRaio: boolean;
   exigirJustificativaForaRaio: boolean;
+  // Novos horários flexíveis
+  horariosSemanais: { [diaSemana: string]: HorarioDia };
 }
 
 export default function ConfiguracoesPage() {
@@ -42,6 +52,8 @@ export default function ConfiguracoesPage() {
   const cnpjInput = useFormattedInput();
   const telefoneInput = useFormattedInput();
   const [isLoading, setIsLoading] = useState(false);
+  const horariosDefault = gerarHorariosPadrao();
+
   const [formData, setFormData] = useState<EmpresaForm>({
     nome: "",
     cnpj: "",
@@ -51,55 +63,75 @@ export default function ConfiguracoesPage() {
     latitude: undefined,
     longitude: undefined,
     raioPermitido: 100,
-    // Configurações de horário
-    horarioInicioManha: "08:00",
-    horarioFimManha: "12:00",
-    horarioInicioTarde: "14:00",
-    horarioFimTarde: "18:00",
     // Tolerâncias (em minutos)
     toleranciaEntrada: 15,
     toleranciaSaida: 15,
     // Configurações de flexibilidade
     permitirRegistroForaRaio: false,
     exigirJustificativaForaRaio: true,
+    // Novos horários semanais
+    horariosSemanais: horariosDefault,
   });
 
-  // Carregar dados da empresa quando disponível
+  // Carregar dados completos da empresa via API
   useEffect(() => {
-    if (empresa) {
-      setFormData({
-        nome: empresa.name || "",
-        cnpj: empresa.cnpj || "",
-        email: empresa.email || "",
-        telefone: empresa.telefone || "",
-        endereco: "", // Será preenchido pela API
-        latitude: undefined,
-        longitude: undefined,
-        raioPermitido: 100,
-        // Configurações de horário
-        horarioInicioManha: "08:00",
-        horarioFimManha: "12:00",
-        horarioInicioTarde: "14:00",
-        horarioFimTarde: "18:00",
-        // Tolerâncias (em minutos)
-        toleranciaEntrada: 15,
-        toleranciaSaida: 15,
-        // Configurações de flexibilidade
-        permitirRegistroForaRaio: false,
-        exigirJustificativaForaRaio: true,
-      });
+    const loadEmpresaData = async () => {
+      if (empresa?.id) {
+        try {
+          const empresaCompleta = await empresasService.getEmpresa(empresa.id);
 
-      // Configurar CNPJ formatado
-      if (empresa.cnpj) {
-        cnpjInput.setValue(formatCNPJ(empresa.cnpj));
-      }
+          setFormData({
+            nome: empresaCompleta.nome || "",
+            cnpj: empresaCompleta.cnpj || "",
+            email: empresaCompleta.email || "",
+            telefone: empresaCompleta.telefone || "",
+            endereco: empresaCompleta.endereco || "",
+            latitude: empresaCompleta.latitude,
+            longitude: empresaCompleta.longitude,
+            raioPermitido: empresaCompleta.raioPermitido || 100,
+            toleranciaEntrada: empresaCompleta.toleranciaEntrada || 15,
+            toleranciaSaida: empresaCompleta.toleranciaSaida || 15,
+            permitirRegistroForaRaio:
+              empresaCompleta.permitirRegistroForaRaio || false,
+            exigirJustificativaForaRaio:
+              empresaCompleta.exigirJustificativaForaRaio || true,
+            horariosSemanais:
+              empresaCompleta.horariosSemanais || horariosDefault,
+          });
 
-      // Configurar telefone formatado
-      if (empresa.telefone) {
-        telefoneInput.setValue(formatTelefone(empresa.telefone));
+          // Configurar CNPJ formatado
+          if (empresaCompleta.cnpj) {
+            cnpjInput.setValue(formatCNPJ(empresaCompleta.cnpj));
+          }
+
+          // Configurar telefone formatado
+          if (empresaCompleta.telefone) {
+            telefoneInput.setValue(formatTelefone(empresaCompleta.telefone));
+          }
+        } catch (error) {
+          console.error("Erro ao carregar dados da empresa:", error);
+          // Fallback para dados do contexto
+          setFormData({
+            nome: empresa.name || "",
+            cnpj: empresa.cnpj || "",
+            email: empresa.email || "",
+            telefone: empresa.telefone || "",
+            endereco: "",
+            latitude: undefined,
+            longitude: undefined,
+            raioPermitido: 100,
+            toleranciaEntrada: 15,
+            toleranciaSaida: 15,
+            permitirRegistroForaRaio: false,
+            exigirJustificativaForaRaio: true,
+            horariosSemanais: horariosDefault,
+          });
+        }
       }
-    }
-  }, [empresa]);
+    };
+
+    loadEmpresaData();
+  }, [empresa?.id]);
 
   const formatCNPJ = (cnpj: string) => {
     const numbers = cnpj.replace(/\D/g, "");
@@ -167,31 +199,14 @@ export default function ConfiguracoesPage() {
         latitude: formData.latitude,
         longitude: formData.longitude,
         raioPermitido: formData.raioPermitido,
-        horarioInicioManha: formData.horarioInicioManha,
-        horarioFimManha: formData.horarioFimManha,
-        horarioInicioTarde: formData.horarioInicioTarde,
-        horarioFimTarde: formData.horarioFimTarde,
         toleranciaEntrada: formData.toleranciaEntrada,
         toleranciaSaida: formData.toleranciaSaida,
         permitirRegistroForaRaio: formData.permitirRegistroForaRaio,
         exigirJustificativaForaRaio: formData.exigirJustificativaForaRaio,
+        horariosSemanais: formData.horariosSemanais,
       };
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/empresas/${empresa?.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.accessToken}`,
-          },
-          body: JSON.stringify(updateData),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Erro ao atualizar empresa");
-      }
+      await empresasService.updateEmpresa(empresa?.id!, updateData);
 
       toast.success("Configurações da empresa atualizadas com sucesso!");
       await refreshUser();
@@ -310,86 +325,18 @@ export default function ConfiguracoesPage() {
             initialAddress={formData.endereco}
           />
 
-          {/* Configurações de Horário */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                Horário de Expediente
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h4 className="font-medium">Período da Manhã</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="horarioInicioManha">Início</Label>
-                      <Input
-                        id="horarioInicioManha"
-                        type="time"
-                        value={formData.horarioInicioManha}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            horarioInicioManha: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="horarioFimManha">Fim</Label>
-                      <Input
-                        id="horarioFimManha"
-                        type="time"
-                        value={formData.horarioFimManha}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            horarioFimManha: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="font-medium">Período da Tarde</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="horarioInicioTarde">Início</Label>
-                      <Input
-                        id="horarioInicioTarde"
-                        type="time"
-                        value={formData.horarioInicioTarde}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            horarioInicioTarde: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="horarioFimTarde">Fim</Label>
-                      <Input
-                        id="horarioFimTarde"
-                        type="time"
-                        value={formData.horarioFimTarde}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            horarioFimTarde: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Horários Flexíveis por Dia da Semana */}
+          <HorariosSemanaConfig
+            horarios={formData.horariosSemanais}
+            onChange={(novosHorarios) =>
+              setFormData((prev) => ({
+                ...prev,
+                horariosSemanais: novosHorarios,
+              }))
+            }
+            title="Horários de Funcionamento por Dia"
+            subtitle="Configure horários específicos para cada dia da semana"
+          />
 
           {/* Configurações de Tolerância */}
           <Card>

@@ -4,6 +4,7 @@ import {
   RegistroPonto,
 } from "@/services/ponto.service";
 import { useEffect, useState } from "react";
+import { useGeolocation } from "./use-geolocation";
 
 export function useFuncionarioDashboard() {
   const [registros, setRegistros] = useState<RegistroPonto[]>([]);
@@ -12,6 +13,7 @@ export function useFuncionarioDashboard() {
   const [ultimoRegistro, setUltimoRegistro] = useState<RegistroPonto | null>(
     null
   );
+  const { getCurrentPosition } = useGeolocation();
 
   useEffect(() => {
     const loadData = async () => {
@@ -39,15 +41,83 @@ export function useFuncionarioDashboard() {
     loadData();
   }, []);
 
-  const registrarPonto = async (): Promise<RegistroPonto> => {
-    const novoRegistro = await pontoService.registrarPonto({
-      tipo: "entrada",
+  const getProximoTipoRegistro = ():
+    | "entrada"
+    | "saida"
+    | "intervalo_inicio"
+    | "intervalo_fim"
+    | null => {
+    if (!registros || registros.length === 0) {
+      return "entrada";
+    }
+
+    // Buscar registros de hoje
+    const hoje = new Date().toISOString().split("T")[0];
+    const registrosHoje = registros.filter((registro) => {
+      const dataRegistro = new Date(registro.dataHora)
+        .toISOString()
+        .split("T")[0];
+      return dataRegistro === hoje;
     });
 
-    setRegistros((prev) => [novoRegistro, ...prev]);
-    setUltimoRegistro(novoRegistro);
+    if (registrosHoje.length === 0) {
+      return "entrada";
+    }
 
-    return novoRegistro;
+    // Verificar se já foram feitos todos os registros do dia (máximo 4)
+    if (registrosHoje.length >= 4) {
+      return null; // Não pode fazer mais registros hoje
+    }
+
+    // Verificar se já existe cada tipo de registro
+    const tiposRegistrados = registrosHoje.map((r) => r.tipo);
+
+    if (!tiposRegistrados.includes("entrada")) {
+      return "entrada";
+    }
+    if (!tiposRegistrados.includes("intervalo_inicio")) {
+      return "intervalo_inicio";
+    }
+    if (!tiposRegistrados.includes("intervalo_fim")) {
+      return "intervalo_fim";
+    }
+    if (!tiposRegistrados.includes("saida")) {
+      return "saida";
+    }
+
+    // Todos os registros foram feitos
+    return null;
+  };
+
+  const registrarPonto = async (
+    observacoes?: string
+  ): Promise<RegistroPonto> => {
+    try {
+      // Determinar o tipo de registro
+      const tipo = getProximoTipoRegistro();
+
+      if (!tipo) {
+        throw new Error("Todos os registros do dia já foram feitos");
+      }
+
+      // Obter localização atual
+      const position = await getCurrentPosition();
+
+      const novoRegistro = await pontoService.registrarPonto({
+        tipo,
+        latitude: position.latitude,
+        longitude: position.longitude,
+        observacoes,
+      });
+
+      setRegistros((prev) => [novoRegistro, ...prev]);
+      setUltimoRegistro(novoRegistro);
+
+      return novoRegistro;
+    } catch (error) {
+      console.error("Erro ao registrar ponto:", error);
+      throw error;
+    }
   };
 
   const solicitarJustificativa = async (data: string, motivo: string) => {
@@ -67,5 +137,6 @@ export function useFuncionarioDashboard() {
     isLoading,
     registrarPonto,
     solicitarJustificativa,
+    getProximoTipoRegistro,
   };
 }

@@ -18,6 +18,16 @@ export interface Empresa {
   email: string;
   telefone?: string;
   endereco?: string;
+  horariosSemanais?: {
+    [diaSemana: string]: {
+      ativo: boolean;
+      inicio: string;
+      fim: string;
+      temIntervalo: boolean;
+      intervaloInicio?: string;
+      intervaloFim?: string;
+    };
+  };
   createdAt: string;
   updatedAt: string;
 }

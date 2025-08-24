@@ -5,16 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { useDepartamentos } from "@/hooks/use-departamentos";
 import { useFuncionarioActions } from "@/hooks/use-funcionarios";
+import { gerarHorariosPadrao } from "@/lib/horarios";
 import {
   CreateFuncionarioRequest,
   UpdateFuncionarioRequest,
 } from "@/services/funcionarios.service";
 import { Funcionario } from "@/types";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { HorariosFuncionarioConfig } from "./HorariosFuncionarioConfig";
 
 const formatCPF = (value: string) => {
   const numbers = value.replace(/\D/g, "");
@@ -36,6 +39,15 @@ interface CreateFuncionarioModalProps {
   isEditing?: boolean;
 }
 
+interface HorarioDia {
+  ativo: boolean;
+  inicio: string;
+  fim: string;
+  temIntervalo: boolean;
+  intervaloInicio?: string;
+  intervaloFim?: string;
+}
+
 interface FormData {
   nome: string;
   cpf: string;
@@ -44,9 +56,8 @@ interface FormData {
   cargo: string;
   departamentoId: string;
   dataAdmissao: string;
-  entrada: string;
-  saida: string;
-  intervalos: { inicio: string; fim: string }[];
+  horariosFuncionario: { [diaSemana: string]: HorarioDia };
+  cargaHorariaSemanal: number;
 }
 
 interface DepartamentoFormData {
@@ -68,8 +79,12 @@ export function CreateFuncionarioModal({
     createDepartamento,
     loading: loadingDepartamentos,
   } = useDepartamentos();
-  const [intervalos, setIntervalos] = useState([{ inicio: "--", fim: "--" }]);
+  const { empresa } = useAuth();
   const [showDepartamentoModal, setShowDepartamentoModal] = useState(false);
+  const [horariosFuncionario, setHorariosFuncionario] = useState(
+    gerarHorariosPadrao()
+  );
+  const [cargaHorariaSemanal, setCargaHorariaSemanal] = useState(40);
   const toast = useToast();
 
   const {
@@ -80,8 +95,8 @@ export function CreateFuncionarioModal({
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
-      entrada: "--",
-      saida: "--",
+      horariosFuncionario: gerarHorariosPadrao(),
+      cargaHorariaSemanal: 40,
     },
   });
 
@@ -100,14 +115,16 @@ export function CreateFuncionarioModal({
           ? new Date(funcionario.dataAdmissao).toISOString().split("T")[0]
           : ""
       );
-      setValue("entrada", funcionario.horarioTrabalho?.entrada || "--");
-      setValue("saida", funcionario.horarioTrabalho?.saida || "--");
-      setIntervalos(
-        funcionario.horarioTrabalho?.intervalos &&
-          funcionario.horarioTrabalho.intervalos.length > 0
-          ? funcionario.horarioTrabalho.intervalos
-          : [{ inicio: "--", fim: "--" }]
-      );
+
+      // Carregar horários do funcionário ou usar padrão
+      const horariosCarregados =
+        funcionario.horariosFuncionario || gerarHorariosPadrao();
+      setHorariosFuncionario(horariosCarregados);
+      setValue("horariosFuncionario", horariosCarregados);
+
+      const cargaCarregada = funcionario.cargaHorariaSemanal || 40;
+      setCargaHorariaSemanal(cargaCarregada);
+      setValue("cargaHorariaSemanal", cargaCarregada);
     }
   }, [isEditing, funcionario, setValue]);
 
@@ -117,24 +134,6 @@ export function CreateFuncionarioModal({
     reset: resetDepartamento,
     formState: { errors: errorsDepartamento },
   } = useForm<DepartamentoFormData>();
-
-  const addIntervalo = () => {
-    setIntervalos([...intervalos, { inicio: "", fim: "" }]);
-  };
-
-  const removeIntervalo = (index: number) => {
-    setIntervalos(intervalos.filter((_, i) => i !== index));
-  };
-
-  const updateIntervalo = (
-    index: number,
-    field: "inicio" | "fim",
-    value: string
-  ) => {
-    const newIntervalos = [...intervalos];
-    newIntervalos[index][field] = value;
-    setIntervalos(newIntervalos);
-  };
 
   const handleAddDepartamento = async (data: DepartamentoFormData) => {
     if (data.nome.trim()) {
@@ -163,18 +162,15 @@ export function CreateFuncionarioModal({
         cargo: data.cargo,
         departamentoId: data.departamentoId,
         dataAdmissao: data.dataAdmissao,
-        horarioTrabalho: {
-          entrada: data.entrada,
-          saida: data.saida,
-          intervalos: intervalos.filter((i) => i.inicio && i.fim),
-        },
+        horariosFuncionario: horariosFuncionario,
+        cargaHorariaSemanal: cargaHorariaSemanal,
       };
 
       const result = await updateFuncionario(funcionario.id, funcionarioData);
       if (result) {
         toast.success("Funcionário atualizado com sucesso!");
         reset();
-        setIntervalos([{ inicio: "--", fim: "--" }]);
+
         onSuccess();
         onClose();
       } else {
@@ -190,11 +186,8 @@ export function CreateFuncionarioModal({
         departamentoId: data.departamentoId,
         dataAdmissao: data.dataAdmissao,
         papel: "funcionario",
-        horarioTrabalho: {
-          entrada: data.entrada,
-          saida: data.saida,
-          intervalos: intervalos.filter((i) => i.inicio && i.fim),
-        },
+        horariosFuncionario: horariosFuncionario,
+        cargaHorariaSemanal: cargaHorariaSemanal,
       };
 
       const result = await createFuncionario(funcionarioData);
@@ -203,7 +196,7 @@ export function CreateFuncionarioModal({
           "Funcionário criado com sucesso! Senha: CPF (apenas números)"
         );
         reset();
-        setIntervalos([{ inicio: "--", fim: "--" }]);
+
         onSuccess();
         onClose();
       } else {
@@ -214,7 +207,8 @@ export function CreateFuncionarioModal({
 
   const handleClose = () => {
     reset();
-    setIntervalos([{ inicio: "--", fim: "--" }]);
+    setHorariosFuncionario(gerarHorariosPadrao());
+    setCargaHorariaSemanal(40);
     onClose();
   };
 
@@ -226,9 +220,17 @@ export function CreateFuncionarioModal({
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>
-              {isEditing ? "Editar Funcionário" : "Novo Funcionário"}
-            </CardTitle>
+            <div>
+              <CardTitle>
+                {isEditing ? "Editar Funcionário" : "Novo Funcionário"}
+              </CardTitle>
+              <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+                <span>Carga Horária Semanal:</span>
+                <span className="font-medium text-primary">
+                  {cargaHorariaSemanal}h
+                </span>
+              </div>
+            </div>
             <Button variant="ghost" size="sm" onClick={handleClose}>
               <X className="w-4 h-4" />
             </Button>
@@ -419,97 +421,19 @@ export function CreateFuncionarioModal({
                 </div>
               </div>
 
-              {/* Horário de Trabalho */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Horário de Trabalho</h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="entrada">Horário de Entrada *</Label>
-                    <Input
-                      id="entrada"
-                      type="time"
-                      placeholder="--"
-                      {...register("entrada", {
-                        required: "Horário de entrada é obrigatório",
-                      })}
-                    />
-                    {errors.entrada && (
-                      <p className="text-destructive text-sm mt-1">
-                        {errors.entrada.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="saida">Horário de Saída *</Label>
-                    <Input
-                      id="saida"
-                      type="time"
-                      placeholder="--"
-                      {...register("saida", {
-                        required: "Horário de saída é obrigatório",
-                      })}
-                    />
-                    {errors.saida && (
-                      <p className="text-destructive text-sm mt-1">
-                        {errors.saida.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Intervalos */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between mb-3">
-                    <Label>Intervalos</Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={addIntervalo}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar Intervalo
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2">
-                    {intervalos.map((intervalo, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <Input
-                          type="time"
-                          placeholder="Início"
-                          value={intervalo.inicio}
-                          onChange={(e) =>
-                            updateIntervalo(index, "inicio", e.target.value)
-                          }
-                        />
-                        <span className="text-muted-foreground">até</span>
-                        <Input
-                          type="time"
-                          placeholder="Fim"
-                          value={intervalo.fim}
-                          onChange={(e) =>
-                            updateIntervalo(index, "fim", e.target.value)
-                          }
-                        />
-                        {intervalos.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeIntervalo(index)}
-                            className="text-destructive hover:text-destructive/70"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              {/* Horários de Trabalho */}
+              <HorariosFuncionarioConfig
+                horarios={horariosFuncionario}
+                horariosEmpresa={
+                  empresa?.horariosSemanais || gerarHorariosPadrao()
+                }
+                onChange={(novosHorarios, novaCarga) => {
+                  setHorariosFuncionario(novosHorarios);
+                  setCargaHorariaSemanal(novaCarga);
+                  setValue("horariosFuncionario", novosHorarios);
+                  setValue("cargaHorariaSemanal", novaCarga);
+                }}
+              />
 
               {/* Botões */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t">

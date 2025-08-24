@@ -23,8 +23,14 @@ import { useState } from "react";
 export default function FuncionarioPage() {
   const { user, logout } = useAuth();
   const toast = useToast();
-  const { registros, bancoHoras, ultimoRegistro, isLoading, registrarPonto } =
-    useFuncionarioDashboard();
+  const {
+    registros,
+    bancoHoras,
+    ultimoRegistro,
+    isLoading,
+    registrarPonto,
+    getProximoTipoRegistro,
+  } = useFuncionarioDashboard();
   const [isRegistrando, setIsRegistrando] = useState(false);
 
   const handleRegistrarPonto = async () => {
@@ -33,8 +39,17 @@ export default function FuncionarioPage() {
     try {
       await registrarPonto();
       toast.success("Ponto registrado com sucesso!");
-    } catch (error) {
-      toast.error("Erro ao registrar ponto. Tente novamente.");
+    } catch (error: any) {
+      console.error("Erro ao registrar ponto:", error);
+
+      // Tratar erros específicos de geolocalização
+      if (error?.code) {
+        toast.error(error.message);
+      } else if (error?.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Erro ao registrar ponto. Tente novamente.");
+      }
     } finally {
       setIsRegistrando(false);
     }
@@ -73,6 +88,12 @@ export default function FuncionarioPage() {
       intervalo_fim: "Fim do Intervalo",
     };
     return labels[tipo as keyof typeof labels] || tipo;
+  };
+
+  const getProximoTipoLabel = () => {
+    const proximoTipo = getProximoTipoRegistro();
+    if (!proximoTipo) return "Registros Completos";
+    return getTipoLabel(proximoTipo);
   };
 
   const getStatusIcon = (status: string) => {
@@ -132,26 +153,40 @@ export default function FuncionarioPage() {
               <CardTitle className="text-xl font-bold text-gray-900 dark:text-white">
                 Registrar Ponto
               </CardTitle>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {formatarData(new Date().toISOString())} -{" "}
-                {formatarHora(new Date().toISOString())}
-              </p>
+              <div className="space-y-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {formatarData(new Date().toISOString())} -{" "}
+                  {formatarHora(new Date().toISOString())}
+                </p>
+                <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                  Próximo: {getProximoTipoLabel()}
+                </p>
+              </div>
             </CardHeader>
             <CardContent className="text-center">
               <Button
                 onClick={handleRegistrarPonto}
-                disabled={isRegistrando}
-                className="w-full h-16 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg"
+                disabled={isRegistrando || !getProximoTipoRegistro()}
+                className={`w-full h-16 text-lg font-semibold rounded-xl shadow-lg ${
+                  !getProximoTipoRegistro()
+                    ? "bg-gray-400 hover:bg-gray-400 text-gray-600 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                }`}
               >
                 {isRegistrando ? (
                   <div className="flex items-center gap-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Registrando...
                   </div>
+                ) : !getProximoTipoRegistro() ? (
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-6 h-6" />
+                    {getProximoTipoLabel()}
+                  </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <Clock className="w-6 h-6" />
-                    Registrar Ponto
+                    Registrar {getProximoTipoLabel()}
                   </div>
                 )}
               </Button>
@@ -177,16 +212,8 @@ export default function FuncionarioPage() {
                   })}
                 </div>
 
-                {/* Saldo do Mês */}
+                {/* Estatísticas do Mês */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      +{bancoHoras.saldoMes}h
-                    </div>
-                    <div className="text-sm text-green-600 dark:text-green-400">
-                      Saldo do Mês
-                    </div>
-                  </div>
                   <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {bancoHoras.horasTrabalhadas}h
@@ -194,6 +221,66 @@ export default function FuncionarioPage() {
                     <div className="text-sm text-blue-600 dark:text-blue-400">
                       Horas Trabalhadas
                     </div>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+                      {bancoHoras.horasPrevistas}h
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Horas Previstas
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informações Gerais */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Carga horária semanal:
+                    </span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {bancoHoras.horasSemanais || 40}h
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Dias trabalhados:
+                    </span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {bancoHoras.diasTrabalhados} de {bancoHoras.diasUteis}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Média semanal:
+                    </span>
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {bancoHoras.semanasTrabalhadas > 0
+                        ? Math.round(
+                            (bancoHoras.horasTrabalhadas /
+                              bancoHoras.semanasTrabalhadas) *
+                              100
+                          ) / 100
+                        : 0}
+                      h
+                    </span>
+                  </div>
+                </div>
+
+                {/* Saldo do Mês */}
+                <div className="text-center p-3 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg">
+                  <div className="text-sm text-green-600 dark:text-green-400 mb-1">
+                    Saldo do Mês
+                  </div>
+                  <div
+                    className={`text-3xl font-bold ${
+                      bancoHoras.saldoMes >= 0
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-red-600 dark:text-red-400"
+                    }`}
+                  >
+                    {bancoHoras.saldoMes >= 0 ? "+" : ""}
+                    {bancoHoras.saldoMes}h
                   </div>
                 </div>
 

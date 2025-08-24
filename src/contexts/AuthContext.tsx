@@ -24,6 +24,16 @@ type Empresa = {
   cnpj: string;
   email: string;
   telefone?: string;
+  horariosSemanais?: {
+    [diaSemana: string]: {
+      ativo: boolean;
+      inicio: string;
+      fim: string;
+      temIntervalo: boolean;
+      intervaloInicio?: string;
+      intervaloFim?: string;
+    };
+  };
 };
 
 type AuthContextType = {
