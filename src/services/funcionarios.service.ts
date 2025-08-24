@@ -4,7 +4,7 @@ import { Funcionario } from "@/types";
 export interface CreateFuncionarioRequest {
   nome: string;
   email: string;
-  password: string;
+  password?: string;
   telefone?: string;
   photoUrl?: string;
   cpf?: string;
@@ -38,6 +38,11 @@ export interface FuncionariosFilters {
   status?: "ativo" | "inativo" | "suspenso";
   papel?: "dono" | "administrador" | "funcionario";
   search?: string;
+}
+
+export interface DeleteResponse {
+  message: string;
+  deletedId: string;
 }
 
 export class FuncionariosService {
@@ -91,8 +96,8 @@ export class FuncionariosService {
     return api.patch<Funcionario>(`${this.basePath}/${id}`, data);
   }
 
-  async delete(id: string): Promise<void> {
-    return api.delete<void>(`${this.basePath}/${id}`);
+  async delete(id: string): Promise<DeleteResponse> {
+    return api.delete<DeleteResponse>(`${this.basePath}/${id}`);
   }
 }
 

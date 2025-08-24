@@ -189,7 +189,6 @@ export function CreateFuncionarioModal({
         cargo: data.cargo,
         departamentoId: data.departamentoId,
         dataAdmissao: data.dataAdmissao,
-        password: "123456", // Senha padrão - deve ser alterada pelo usuário
         papel: "funcionario",
         horarioTrabalho: {
           entrada: data.entrada,
@@ -200,7 +199,9 @@ export function CreateFuncionarioModal({
 
       const result = await createFuncionario(funcionarioData);
       if (result) {
-        toast.success("Funcionário criado com sucesso!");
+        toast.success(
+          "Funcionário criado com sucesso! Senha: CPF (apenas números)"
+        );
         reset();
         setIntervalos([{ inicio: "--", fim: "--" }]);
         onSuccess();
@@ -244,6 +245,14 @@ export function CreateFuncionarioModal({
               {/* Informações Pessoais */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Informações Pessoais</h3>
+
+                <div className="bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
+                  <p className="text-blue-800 dark:text-blue-200 text-sm">
+                    <strong>💡 Dica:</strong> A senha do funcionário será
+                    automaticamente o CPF (apenas números). O funcionário poderá
+                    alterar a senha no primeiro acesso.
+                  </p>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">

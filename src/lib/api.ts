@@ -45,6 +45,17 @@ class ApiClient {
         );
       }
 
+      // Para DELETE, verificar se há conteúdo antes de tentar fazer parse
+      const contentType = response.headers.get("content-type");
+      if (
+        response.status === 204 ||
+        !contentType ||
+        !contentType.includes("application/json")
+      ) {
+        // Resposta vazia ou não-JSON
+        return {} as T;
+      }
+
       return await response.json();
     } catch (error) {
       console.error("API Error:", error);
