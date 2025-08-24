@@ -42,32 +42,32 @@ import { usePathname } from "next/navigation";
 const menuItems = [
   {
     name: "Dashboard",
-    href: "/empresa",
+    href: "/dashboard",
     icon: LayoutDashboard,
   },
   {
     name: "Controle de Jornada",
-    href: "/empresa/jornada",
+    href: "/dashboard/jornada",
     icon: Clock,
   },
   {
     name: "Ausências",
-    href: "/empresa/ausencias",
+    href: "/dashboard/ausencias",
     icon: UserX,
   },
   {
     name: "Gestão de Férias",
-    href: "/empresa/ferias",
+    href: "/dashboard/ferias",
     icon: Calendar,
   },
   {
     name: "Justificativas",
-    href: "/empresa/justificativas",
+    href: "/dashboard/justificativas",
     icon: MessageSquare,
   },
   {
     name: "Funcionários",
-    href: "/empresa/funcionarios",
+    href: "/dashboard/funcionarios",
     icon: Users,
   },
 ];
@@ -80,7 +80,7 @@ const adminItems = [
   },
   {
     name: "Relatório Contador",
-    href: "/empresa/relatorio-contador",
+    href: "/dashboard/relatorio-contador",
     icon: FileText,
   },
 ];

@@ -13,14 +13,14 @@ export default withAuth(
 
     const userRole = token.role;
 
-    // Proteger rota /empresa - apenas admin e dono
-    if (path.startsWith("/empresa") && userRole === "funcionario") {
+    // Proteger rota /dashboard - apenas admin e dono
+    if (path.startsWith("/dashboard") && userRole === "funcionario") {
       return NextResponse.redirect(new URL("/funcionario", req.url));
     }
 
     // Proteger rota /funcionario - apenas funcionários
     if (path.startsWith("/funcionario") && userRole !== "funcionario") {
-      return NextResponse.redirect(new URL("/empresa", req.url));
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
     return NextResponse.next();
@@ -33,5 +33,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/empresa/:path*", "/funcionario/:path*"],
+  matcher: ["/dashboard/:path*", "/funcionario/:path*"],
 };

@@ -15,7 +15,7 @@ export default async function FuncionarioLayout({
 
   // Verificar se o usuário é funcionário
   if (session.user.role !== "funcionario") {
-    redirect("/empresa");
+    redirect("/dashboard");
   }
 
   return <>{children}</>;

@@ -31,7 +31,7 @@ export default function LoginPage() {
   // Redirecionar se já estiver autenticado
   useEffect(() => {
     if (user) {
-      router.push("/empresa");
+      router.push("/dashboard");
     }
   }, [user, router]);
 
@@ -68,7 +68,7 @@ export default function LoginPage() {
 
     try {
       await login(loginData);
-      router.push("/empresa");
+      router.push("/dashboard");
     } catch (error) {
       setLoginError(
         error instanceof Error ? error.message : "Erro ao fazer login"
@@ -85,7 +85,7 @@ export default function LoginPage() {
 
     try {
       await register(registerData);
-      router.push("/empresa");
+      router.push("/dashboard");
     } catch (error) {
       setRegisterError(
         error instanceof Error ? error.message : "Erro ao criar conta"

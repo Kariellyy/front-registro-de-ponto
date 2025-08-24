@@ -12,7 +12,7 @@ export default async function Home() {
     if (userRole === "funcionario") {
       redirect("/funcionario");
     } else {
-      redirect("/empresa");
+      redirect("/dashboard");
     }
   } else {
     redirect("/login");

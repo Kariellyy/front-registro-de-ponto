@@ -14,7 +14,7 @@ const getBreadcrumbItems = (pathname: string) => {
     label: string;
     href: string;
     icon: typeof Home | null;
-  }> = [{ label: "Home", href: "/empresa", icon: Home }];
+  }> = [{ label: "Home", href: "/dashboard", icon: Home }];
 
   if (segments.length > 1) {
     const currentPage = segments[1];

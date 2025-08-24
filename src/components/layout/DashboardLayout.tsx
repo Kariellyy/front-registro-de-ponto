@@ -1,17 +1,14 @@
 "use client";
 
-import {
-  SidebarInset,
-  SidebarProvider
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import Navbar from "./Navbar";
 import AppSidebar from "./Sidebar";
 
-interface EmpresaLayoutProps {
+interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-export default function EmpresaLayout({ children }: EmpresaLayoutProps) {
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <SidebarProvider>
       <AppSidebar />
