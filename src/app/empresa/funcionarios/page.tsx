@@ -176,17 +176,6 @@ export default function FuncionariosPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={refresh}
-              disabled={loading}
-            >
-              <RefreshCw
-                className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
-              />
-              Atualizar
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
               onClick={() => setIsDepartamentoModalOpen(true)}
             >
               Gerenciar Departamentos
