@@ -25,6 +25,7 @@ const getBreadcrumbItems = (pathname: string) => {
       ferias: "Gestão de Férias",
       justificativas: "Justificativas",
       "relatorio-contador": "Relatório Contador",
+      configuracoes: "Configurações da Empresa",
       tema: "Tema",
     };
 

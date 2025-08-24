@@ -75,7 +75,7 @@ const menuItems = [
 const adminItems = [
   {
     name: "Empresa",
-    href: "#",
+    href: "/dashboard/configuracoes",
     icon: Building,
   },
   {
