@@ -1,27 +1,30 @@
-'use client';
+"use client";
 
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-import { ReactNode, useEffect } from 'react';
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { ReactNode, useEffect } from "react";
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  allowedRoles?: ('dono' | 'administrador' | 'funcionario')[];
+  allowedRoles?: ("dono" | "administrador" | "funcionario")[];
 }
 
-export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({
+  children,
+  allowedRoles,
+}: ProtectedRouteProps) => {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading) {
       if (!user) {
-        router.push('/login');
+        router.push("/login");
         return;
       }
 
-      if (allowedRoles && !allowedRoles.includes(user.papel)) {
-        router.push('/empresa'); // Redirecionar para página inicial se não tiver permissão
+      if (allowedRoles && !allowedRoles.includes(user.role as any)) {
+        router.push("/empresa"); // Redirecionar para página inicial se não tiver permissão
         return;
       }
     }
@@ -39,7 +42,7 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
     return null;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.papel)) {
+  if (allowedRoles && !allowedRoles.includes(user.role as any)) {
     return null;
   }
 

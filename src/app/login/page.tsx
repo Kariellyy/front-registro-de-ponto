@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginRequest, RegisterRequest } from "@/types/auth";
-import { Building2, Eye, EyeOff, FileText, Lock, Mail, User } from "lucide-react";
+import {
+  Building2,
+  Eye,
+  EyeOff,
+  FileText,
+  Lock,
+  Mail,
+  User,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -21,7 +29,7 @@ export default function LoginPage() {
   // Redirecionar se já estiver autenticado
   useEffect(() => {
     if (user) {
-      router.push('/empresa');
+      router.push("/empresa");
     }
   }, [user, router]);
 
@@ -50,8 +58,11 @@ export default function LoginPage() {
 
     try {
       await login(loginData);
+      router.push("/empresa");
     } catch (error) {
-      setLoginError(error instanceof Error ? error.message : "Erro ao fazer login");
+      setLoginError(
+        error instanceof Error ? error.message : "Erro ao fazer login"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -64,8 +75,11 @@ export default function LoginPage() {
 
     try {
       await register(registerData);
+      router.push("/empresa");
     } catch (error) {
-      setRegisterError(error instanceof Error ? error.message : "Erro ao criar conta");
+      setRegisterError(
+        error instanceof Error ? error.message : "Erro ao criar conta"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +129,10 @@ export default function LoginPage() {
               <TabsContent value="login" className="space-y-4">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email" className="text-foreground font-medium">
+                    <Label
+                      htmlFor="login-email"
+                      className="text-foreground font-medium"
+                    >
                       Email
                     </Label>
                     <div className="relative">
@@ -125,7 +142,9 @@ export default function LoginPage() {
                         type="email"
                         placeholder="seu@email.com"
                         value={loginData.email}
-                        onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                        onChange={(e) =>
+                          setLoginData({ ...loginData, email: e.target.value })
+                        }
                         className="pl-10 border-border focus:border-ring focus:ring-ring text-foreground"
                         required
                         disabled={isLoading}
@@ -134,7 +153,10 @@ export default function LoginPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-foreground font-medium">
+                    <Label
+                      htmlFor="login-password"
+                      className="text-foreground font-medium"
+                    >
                       Senha
                     </Label>
                     <div className="relative">
@@ -144,7 +166,12 @@ export default function LoginPage() {
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
                         value={loginData.password}
-                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                        onChange={(e) =>
+                          setLoginData({
+                            ...loginData,
+                            password: e.target.value,
+                          })
+                        }
                         className="pl-10 pr-10 border-border focus:border-ring focus:ring-ring text-foreground"
                         required
                         disabled={isLoading}
@@ -155,7 +182,11 @@ export default function LoginPage() {
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         disabled={isLoading}
                       >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -168,7 +199,11 @@ export default function LoginPage() {
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full py-3" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    className="w-full py-3"
+                    disabled={isLoading}
+                  >
                     {isLoading ? (
                       <div className="flex items-center space-x-2">
                         <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>
@@ -185,7 +220,10 @@ export default function LoginPage() {
               <TabsContent value="register" className="space-y-4">
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="register-name" className="text-foreground font-medium">
+                    <Label
+                      htmlFor="register-name"
+                      className="text-foreground font-medium"
+                    >
                       Nome Completo
                     </Label>
                     <div className="relative">
@@ -195,7 +233,12 @@ export default function LoginPage() {
                         type="text"
                         placeholder="Seu nome completo"
                         value={registerData.nome}
-                        onChange={(e) => setRegisterData({ ...registerData, nome: e.target.value })}
+                        onChange={(e) =>
+                          setRegisterData({
+                            ...registerData,
+                            nome: e.target.value,
+                          })
+                        }
                         className="pl-10 border-border focus:border-ring focus:ring-ring text-foreground"
                         required
                         disabled={isLoading}
@@ -204,7 +247,10 @@ export default function LoginPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="register-email" className="text-foreground font-medium">
+                    <Label
+                      htmlFor="register-email"
+                      className="text-foreground font-medium"
+                    >
                       Email
                     </Label>
                     <div className="relative">
@@ -214,7 +260,12 @@ export default function LoginPage() {
                         type="email"
                         placeholder="seu@email.com"
                         value={registerData.email}
-                        onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                        onChange={(e) =>
+                          setRegisterData({
+                            ...registerData,
+                            email: e.target.value,
+                          })
+                        }
                         className="pl-10 border-border focus:border-ring focus:ring-ring text-foreground"
                         required
                         disabled={isLoading}
@@ -223,7 +274,10 @@ export default function LoginPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="register-password" className="text-foreground font-medium">
+                    <Label
+                      htmlFor="register-password"
+                      className="text-foreground font-medium"
+                    >
                       Senha
                     </Label>
                     <div className="relative">
@@ -233,7 +287,12 @@ export default function LoginPage() {
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
                         value={registerData.password}
-                        onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                        onChange={(e) =>
+                          setRegisterData({
+                            ...registerData,
+                            password: e.target.value,
+                          })
+                        }
                         className="pl-10 pr-10 border-border focus:border-ring focus:ring-ring text-foreground"
                         required
                         disabled={isLoading}
@@ -244,17 +303,26 @@ export default function LoginPage() {
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         disabled={isLoading}
                       >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
                       </button>
                     </div>
                   </div>
 
                   <div className="border-t pt-4">
-                    <h3 className="text-sm font-medium text-foreground mb-3">Dados da Empresa</h3>
-                    
+                    <h3 className="text-sm font-medium text-foreground mb-3">
+                      Dados da Empresa
+                    </h3>
+
                     <div className="space-y-3">
                       <div className="space-y-2">
-                        <Label htmlFor="company-name" className="text-foreground font-medium">
+                        <Label
+                          htmlFor="company-name"
+                          className="text-foreground font-medium"
+                        >
                           Nome da Empresa
                         </Label>
                         <div className="relative">
@@ -264,7 +332,12 @@ export default function LoginPage() {
                             type="text"
                             placeholder="Nome da sua empresa"
                             value={registerData.nomeEmpresa}
-                            onChange={(e) => setRegisterData({ ...registerData, nomeEmpresa: e.target.value })}
+                            onChange={(e) =>
+                              setRegisterData({
+                                ...registerData,
+                                nomeEmpresa: e.target.value,
+                              })
+                            }
                             className="pl-10 border-border focus:border-ring focus:ring-ring text-foreground"
                             required
                             disabled={isLoading}
@@ -273,7 +346,10 @@ export default function LoginPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="company-cnpj" className="text-foreground font-medium">
+                        <Label
+                          htmlFor="company-cnpj"
+                          className="text-foreground font-medium"
+                        >
                           CNPJ
                         </Label>
                         <div className="relative">
@@ -283,7 +359,12 @@ export default function LoginPage() {
                             type="text"
                             placeholder="00.000.000/0001-00"
                             value={registerData.cnpj}
-                            onChange={(e) => setRegisterData({ ...registerData, cnpj: e.target.value })}
+                            onChange={(e) =>
+                              setRegisterData({
+                                ...registerData,
+                                cnpj: e.target.value,
+                              })
+                            }
                             className="pl-10 border-border focus:border-ring focus:ring-ring text-foreground"
                             required
                             disabled={isLoading}
@@ -292,7 +373,10 @@ export default function LoginPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="company-email" className="text-foreground font-medium">
+                        <Label
+                          htmlFor="company-email"
+                          className="text-foreground font-medium"
+                        >
                           Email da Empresa
                         </Label>
                         <div className="relative">
@@ -302,7 +386,12 @@ export default function LoginPage() {
                             type="email"
                             placeholder="contato@empresa.com"
                             value={registerData.emailEmpresa}
-                            onChange={(e) => setRegisterData({ ...registerData, emailEmpresa: e.target.value })}
+                            onChange={(e) =>
+                              setRegisterData({
+                                ...registerData,
+                                emailEmpresa: e.target.value,
+                              })
+                            }
                             className="pl-10 border-border focus:border-ring focus:ring-ring text-foreground"
                             required
                             disabled={isLoading}
@@ -320,7 +409,11 @@ export default function LoginPage() {
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full py-3" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    className="w-full py-3"
+                    disabled={isLoading}
+                  >
                     {isLoading ? (
                       <div className="flex items-center space-x-2">
                         <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin"></div>

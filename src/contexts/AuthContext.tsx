@@ -1,21 +1,44 @@
-'use client';
+"use client";
 
-import { AuthService } from '@/services/auth.service';
-import { AuthUser, LoginRequest, RegisterRequest } from '@/types/auth';
-import { useRouter } from 'next/navigation';
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { LoginRequest, RegisterRequest } from "@/types/auth";
+import { signIn, signOut, useSession } from "next-auth/react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
-interface AuthContextType {
-  user: AuthUser | null;
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  empresaId: string;
+};
+
+type Empresa = {
+  id: string;
+  name: string;
+  cnpj: string;
+  email: string;
+  telefone?: string;
+};
+
+type AuthContextType = {
+  user: User | null;
+  empresa: Empresa | null;
   isLoading: boolean;
   login: (credentials: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
-}
+};
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  empresa: null,
   isLoading: true,
   login: async () => {},
   register: async () => {},
@@ -25,110 +48,95 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
-interface AuthProviderProps {
+type AuthProviderProps = {
   children: ReactNode;
-}
+};
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const { data: session, status, update } = useSession();
+  const [user, setUser] = useState<User | null>(null);
+  const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
-    initAuth();
-  }, []);
-
-  const initAuth = async () => {
-    try {
-      if (AuthService.isAuthenticated()) {
-        // Tentar obter dados atualizados do usuário
-        try {
-          await refreshUser();
-        } catch (error) {
-          console.error('Erro ao atualizar dados do usuário:', error);
-          // Se falhar, usar dados do localStorage
-          const localUser = AuthService.getUser();
-          if (localUser) {
-            setUser(localUser);
-          } else {
-            AuthService.logout();
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Erro na inicialização da autenticação:', error);
-      AuthService.logout();
-    } finally {
-      setIsLoading(false);
+    if (status === "loading") {
+      return;
     }
-  };
+
+    if (status === "authenticated" && session) {
+      setUser({
+        id: session.user.id,
+        name: session.user.name || "",
+        email: session.user.email || "",
+        role: session.user.role,
+        empresaId: session.user.empresaId,
+      });
+
+      if (session.empresa) {
+        setEmpresa(session.empresa);
+      }
+    } else {
+      setUser(null);
+      setEmpresa(null);
+    }
+
+    setIsLoading(false);
+  }, [session, status]);
 
   const login = async (credentials: LoginRequest) => {
-    try {
-      const response = await AuthService.login(credentials);
-      
-      const authUser: AuthUser = {
-        id: response.user.id,
-        nome: response.user.nome,
-        email: response.user.email,
-        papel: response.user.papel,
-        empresa: response.empresa,
-      };
-      
-      setUser(authUser);
-      
-      // Redirecionar para o dashboard da empresa
-      router.push('/empresa');
-    } catch (error) {
-      console.error('Erro no login:', error);
-      throw error;
+    const result = await signIn("credentials", {
+      email: credentials.email,
+      password: credentials.password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      throw new Error(result.error);
     }
   };
 
   const register = async (data: RegisterRequest) => {
     try {
-      await AuthService.register(data);
-      
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Erro no registro");
+      }
+
       // Após registro, fazer login automaticamente
       await login({
         email: data.email,
         password: data.password,
       });
     } catch (error) {
-      console.error('Erro no registro:', error);
+      console.error("Erro no registro:", error);
       throw error;
     }
   };
 
   const refreshUser = async () => {
-    try {
-      const response = await AuthService.getMe();
-      
-      const authUser: AuthUser = {
-        id: response.user.id,
-        nome: response.user.nome,
-        email: response.user.email,
-        papel: response.user.papel,
-        empresa: response.empresa,
-      };
-      
-      setUser(authUser);
-    } catch (error) {
-      console.error('Erro ao atualizar usuário:', error);
-      throw error;
-    }
+    await update();
   };
 
   const logout = () => {
-    AuthService.logout();
-    setUser(null);
-    router.push('/login');
+    void signOut({ callbackUrl: "/login" });
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        empresa,
         isLoading,
         login,
         register,

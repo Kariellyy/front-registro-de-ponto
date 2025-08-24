@@ -2,11 +2,11 @@ export interface Usuario {
   id: string;
   nome: string;
   email: string;
-  papel: 'dono' | 'administrador' | 'funcionario';
+  papel: "dono" | "administrador" | "funcionario";
   empresaId: string;
   telefone?: string;
   photoUrl?: string;
-  status: 'ativo' | 'inativo' | 'suspenso';
+  status: "ativo" | "inativo" | "suspenso";
   createdAt: string;
   updatedAt: string;
 }
@@ -52,6 +52,58 @@ export interface AuthUser {
   id: string;
   nome: string;
   email: string;
-  papel: 'dono' | 'administrador' | 'funcionario';
+  papel: "dono" | "administrador" | "funcionario";
   empresa: Empresa;
+}
+
+// Tipos para NextAuth
+declare module "next-auth" {
+  interface Session {
+    accessToken: string;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+      empresaId: string;
+    };
+    empresa: {
+      id: string;
+      name: string;
+      cnpj: string;
+      email: string;
+      telefone?: string;
+    } | null;
+  }
+
+  interface User {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    empresaId: string;
+    empresa: {
+      id: string;
+      name: string;
+      cnpj: string;
+      email: string;
+      telefone?: string;
+    } | null;
+    accessToken: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    accessToken: string;
+    role: string;
+    empresaId: string;
+    empresa: {
+      id: string;
+      name: string;
+      cnpj: string;
+      email: string;
+      telefone?: string;
+    } | null;
+  }
 }

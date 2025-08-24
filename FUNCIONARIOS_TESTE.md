@@ -7,19 +7,21 @@
 ✅ **Modal de criação** implementado  
 ✅ **Validações** funcionando  
 ✅ **Notificações** implementadas  
-✅ **CRUD completo** disponível  
+✅ **CRUD completo** disponível
 
 ## 📋 Como Testar
 
 ### 1. Verifique se ambos estão rodando:
 
-**Backend:** `http://localhost:3001`
+**Backend:** `http://localhost:4000`
+
 ```bash
-curl http://localhost:3001/api/funcionarios
+curl http://localhost:4000/api/funcionarios
 # Deve retornar: {"data":[...],"total":1,"page":1,"limit":10,"totalPages":1}
 ```
 
 **Frontend:** `http://localhost:3000`
+
 ```bash
 # Acesse: http://localhost:3000/empresa/funcionarios
 ```
@@ -27,7 +29,7 @@ curl http://localhost:3001/api/funcionarios
 ### 2. Teste o Modal de Criação:
 
 1. **Acesse:** `http://localhost:3000/empresa/funcionarios`
-2. **Clique:** "Novo Funcionário"  
+2. **Clique:** "Novo Funcionário"
 3. **Preencha o formulário:**
 
 ```
@@ -51,25 +53,26 @@ Intervalo: 12:30 - 13:30
 
 **CPF inválido:** Tente `123.456.789-99`  
 **Email inválido:** Tente `email-invalido`  
-**Campos obrigatórios:** Deixe campos vazios  
+**Campos obrigatórios:** Deixe campos vazios
 
 ### 4. Teste Funcionalidades:
 
 - **✅ Busca:** Digite "João" na busca
-- **✅ Filtro Departamento:** Selecione "Tecnologia"  
+- **✅ Filtro Departamento:** Selecione "Tecnologia"
 - **✅ Ativação/Desativação:** Clique no ícone UserX/UserCheck
 - **✅ Atualização:** Clique em "Atualizar"
 - **✅ Estatísticas:** Verifique números atualizados
 
 ### 5. Teste API Direta (via Swagger):
 
-**Acesse:** `http://localhost:3001/api/docs`
+**Acesse:** `http://localhost:4000/api/docs`
 
 **Endpoints disponíveis:**
+
 - `POST /funcionarios` - Criar
 - `GET /funcionarios` - Listar
 - `GET /funcionarios/{id}` - Buscar por ID
-- `PATCH /funcionarios/{id}` - Atualizar  
+- `PATCH /funcionarios/{id}` - Atualizar
 - `DELETE /funcionarios/{id}` - Excluir
 - `PATCH /funcionarios/{id}/ativar` - Ativar
 - `PATCH /funcionarios/{id}/desativar` - Desativar
@@ -77,6 +80,7 @@ Intervalo: 12:30 - 13:30
 ## 🎯 Resultados Esperados
 
 ### No Frontend:
+
 - ✅ Lista de funcionários atualizada em tempo real
 - ✅ Estatísticas corretas (Ativos: 2, Inativos: 0, etc.)
 - ✅ Filtros funcionando
@@ -85,6 +89,7 @@ Intervalo: 12:30 - 13:30
 - ✅ Loading states em todas operações
 
 ### No Backend:
+
 - ✅ Dados persistidos no SQLite (`./dev.db`)
 - ✅ Validações funcionando
 - ✅ Respostas JSON corretas
@@ -93,22 +98,26 @@ Intervalo: 12:30 - 13:30
 ## 🔍 Debug
 
 ### Se o Backend não estiver funcionando:
+
 ```bash
 cd backend-registro-de-ponto
 npm run start:dev
 ```
 
 ### Se o Frontend não estiver funcionando:
+
 ```bash
 cd front-registro-de-ponto
 npm run dev
 ```
 
 ### Se aparecer erro de CORS:
-- Verifique se o backend está rodando na porta 3001
+
+- Verifique se o backend está rodando na porta 4000
 - Confirme o arquivo `.env.local` no frontend
 
 ### Se aparecer erro de validação:
+
 - Verifique se o CPF está no formato XXX.XXX.XXX-XX
 - Confirme se todos os campos obrigatórios estão preenchidos
 
@@ -117,7 +126,7 @@ npm run dev
 Agora que a criação está funcionando, você pode:
 
 1. **Implementar edição:** Modal similar para editar funcionários
-2. **Adicionar visualização:** Modal de detalhes do funcionário  
+2. **Adicionar visualização:** Modal de detalhes do funcionário
 3. **Melhorar filtros:** Filtros mais avançados no backend
 4. **Adicionar upload:** Upload de foto do funcionário
 5. **Implementar outros módulos:** Ponto, Ausências, Férias, etc.
@@ -125,19 +134,21 @@ Agora que a criação está funcionando, você pode:
 ## 📊 Performance
 
 - **Criação:** ~200ms
-- **Listagem:** ~100ms  
+- **Listagem:** ~100ms
 - **Validação:** Instantânea (frontend)
 - **Notificações:** Automáticas
 
 ## 🛠️ Stack Técnica
 
 **Backend:**
+
 - NestJS + TypeScript
 - TypeORM + SQLite
 - Class Validator
 - Swagger
 
-**Frontend:**  
+**Frontend:**
+
 - Next.js + TypeScript
 - React Hook Form
 - TailwindCSS
@@ -145,4 +156,4 @@ Agora que a criação está funcionando, você pode:
 
 ---
 
-**🎯 A criação de funcionários está 100% funcional!** 🚀 
+**🎯 A criação de funcionários está 100% funcional!** 🚀
