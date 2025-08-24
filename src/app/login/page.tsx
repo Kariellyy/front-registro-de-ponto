@@ -1,11 +1,12 @@
 "use client";
 
-import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+import { useFormattedInput } from "@/hooks/use-formatted-input";
 import { LoginRequest, RegisterRequest } from "@/types/auth";
 import {
   Building2,
@@ -25,6 +26,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { login, register, user } = useAuth();
+  const cnpjInput = useFormattedInput();
 
   // Redirecionar se já estiver autenticado
   useEffect(() => {
@@ -49,6 +51,14 @@ export default function LoginPage() {
     cnpj: "",
     emailEmpresa: "",
   });
+
+  // Sincronizar o CNPJ formatado com o estado
+  useEffect(() => {
+    setRegisterData((prev) => ({
+      ...prev,
+      cnpj: cnpjInput.getCNPJNumbers(),
+    }));
+  }, [cnpjInput.value]);
   const [registerError, setRegisterError] = useState("");
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -358,13 +368,8 @@ export default function LoginPage() {
                             id="company-cnpj"
                             type="text"
                             placeholder="00.000.000/0001-00"
-                            value={registerData.cnpj}
-                            onChange={(e) =>
-                              setRegisterData({
-                                ...registerData,
-                                cnpj: e.target.value,
-                              })
-                            }
+                            value={cnpjInput.value}
+                            onChange={cnpjInput.handleCNPJChange}
                             className="pl-10 border-border focus:border-ring focus:ring-ring text-foreground"
                             required
                             disabled={isLoading}
