@@ -48,14 +48,16 @@ export default function FuncionarioPage() {
     window.open("/funcionario/extrato", "_blank");
   };
 
-  const formatarHora = (data: Date) => {
+  const formatarHora = (dataString: string) => {
+    const data = new Date(dataString);
     return data.toLocaleTimeString("pt-BR", {
       hour: "2-digit",
       minute: "2-digit",
     });
   };
 
-  const formatarData = (data: Date) => {
+  const formatarData = (dataString: string) => {
+    const data = new Date(dataString);
     return data.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
@@ -131,7 +133,8 @@ export default function FuncionarioPage() {
                 Registrar Ponto
               </CardTitle>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {formatarData(new Date())} - {formatarHora(new Date())}
+                {formatarData(new Date().toISOString())} -{" "}
+                {formatarHora(new Date().toISOString())}
               </p>
             </CardHeader>
             <CardContent className="text-center">
@@ -168,7 +171,10 @@ export default function FuncionarioPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center text-xs text-gray-500 dark:text-gray-400 mb-2">
-                  {bancoHoras.mes} {bancoHoras.ano}
+                  {new Date().toLocaleDateString("pt-BR", {
+                    month: "long",
+                    year: "numeric",
+                  })}
                 </div>
 
                 {/* Saldo do Mês */}
@@ -183,10 +189,10 @@ export default function FuncionarioPage() {
                   </div>
                   <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      +{bancoHoras.horasExtras}h
+                      {bancoHoras.horasTrabalhadas}h
                     </div>
                     <div className="text-sm text-blue-600 dark:text-blue-400">
-                      Horas Extras
+                      Horas Trabalhadas
                     </div>
                   </div>
                 </div>
@@ -199,13 +205,13 @@ export default function FuncionarioPage() {
                     </div>
                     <div
                       className={`text-2xl font-bold ${
-                        bancoHoras.saldoAtual >= 0
+                        bancoHoras.saldoTotal >= 0
                           ? "text-green-600 dark:text-green-400"
                           : "text-red-600 dark:text-red-400"
                       }`}
                     >
-                      {bancoHoras.saldoAtual >= 0 ? "+" : ""}
-                      {bancoHoras.saldoAtual}h
+                      {bancoHoras.saldoTotal >= 0 ? "+" : ""}
+                      {bancoHoras.saldoTotal}h
                     </div>
                   </div>
                 </div>
