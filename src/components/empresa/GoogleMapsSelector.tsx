@@ -1,6 +1,8 @@
 "use client";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -9,7 +11,7 @@ import {
   LoadScript,
   Marker,
 } from "@react-google-maps/api";
-import { MapPin, Search } from "lucide-react";
+import { CheckCircle, Info, MapPin, Navigation, Search } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
 const libraries: "places"[] = ["places"];
@@ -44,6 +46,10 @@ export default function GoogleMapsSelector({
     initialLocation || null
   );
   const [searchValue, setSearchValue] = useState(initialAddress || "");
+  const [selectedAddress, setSelectedAddress] = useState(initialAddress || "");
+  const [isAddressConfirmed, setIsAddressConfirmed] = useState(
+    !!initialAddress
+  );
   const [autocomplete, setAutocomplete] =
     useState<google.maps.places.Autocomplete | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -85,8 +91,12 @@ export default function GoogleMapsSelector({
           lng: place.geometry.location.lng(),
         };
 
+        const address = place.formatted_address || place.name || "";
+
         setMarker(location);
-        setSearchValue(place.formatted_address || place.name || "");
+        setSearchValue(address);
+        setSelectedAddress(address);
+        setIsAddressConfirmed(true);
 
         if (map) {
           map.panTo(location);
@@ -94,7 +104,7 @@ export default function GoogleMapsSelector({
         }
 
         onLocationSelect({
-          address: place.formatted_address || place.name || "",
+          address,
           lat: location.lat,
           lng: location.lng,
         });
@@ -117,14 +127,20 @@ export default function GoogleMapsSelector({
         if (status === "OK" && results && results[0]) {
           const address = results[0].formatted_address;
           setSearchValue(address);
+          setSelectedAddress(address);
+          setIsAddressConfirmed(true);
           onLocationSelect({
             address,
             lat: location.lat,
             lng: location.lng,
           });
         } else {
+          const coordinateAddress = `${location.lat}, ${location.lng}`;
+          setSearchValue(coordinateAddress);
+          setSelectedAddress(coordinateAddress);
+          setIsAddressConfirmed(true);
           onLocationSelect({
-            address: `${location.lat}, ${location.lng}`,
+            address: coordinateAddress,
             lat: location.lat,
             lng: location.lng,
           });
@@ -155,6 +171,8 @@ export default function GoogleMapsSelector({
             if (status === "OK" && results && results[0]) {
               const address = results[0].formatted_address;
               setSearchValue(address);
+              setSelectedAddress(address);
+              setIsAddressConfirmed(true);
               onLocationSelect({
                 address,
                 lat: location.lat,
@@ -184,98 +202,139 @@ export default function GoogleMapsSelector({
   }
 
   return (
-    <div className="space-y-4">
-      <LoadScript googleMapsApiKey={apiKey} libraries={libraries}>
-        {/* Campo de busca */}
-        <div className="space-y-2">
-          <Label htmlFor="endereco-busca">Buscar Endereço</Label>
-          <div className="flex gap-2">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Autocomplete
-                onLoad={onAutocompleteLoad}
-                onPlaceChanged={onPlaceChanged}
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <MapPin className="w-5 h-5" />
+          Localização da Empresa
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <LoadScript googleMapsApiKey={apiKey} libraries={libraries}>
+          {/* Instruções */}
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Busque o endereço da empresa ou clique diretamente no mapa para
+              definir a localização exata.
+            </AlertDescription>
+          </Alert>
+
+          {/* Campo de busca */}
+          <div className="space-y-2">
+            <Label htmlFor="endereco-busca">Buscar Endereço</Label>
+            <div className="flex gap-2">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Autocomplete
+                  onLoad={onAutocompleteLoad}
+                  onPlaceChanged={onPlaceChanged}
+                  options={{
+                    componentRestrictions: { country: "br" },
+                    fields: ["formatted_address", "geometry", "name"],
+                  }}
+                >
+                  <Input
+                    ref={searchInputRef}
+                    id="endereco-busca"
+                    value={searchValue}
+                    onChange={(e) => {
+                      setSearchValue(e.target.value);
+                      setIsAddressConfirmed(false);
+                    }}
+                    placeholder="Digite o nome da empresa, rua ou bairro..."
+                    className="pl-10"
+                  />
+                </Autocomplete>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={getCurrentLocation}
+                title="Usar minha localização atual"
+              >
+                <Navigation className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Endereço Selecionado */}
+          {isAddressConfirmed && selectedAddress && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-green-800">
+                    Endereço Selecionado:
+                  </p>
+                  <p className="text-sm text-green-700">{selectedAddress}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Mapa */}
+          <div className="space-y-2">
+            <Label>Mapa Interativo</Label>
+            <div className="border rounded-lg overflow-hidden">
+              <GoogleMap
+                mapContainerStyle={mapContainerStyle}
+                center={marker || defaultCenter}
+                zoom={marker ? 17 : 12}
+                onLoad={onLoad}
+                onUnmount={onUnmount}
+                onClick={onMapClick}
                 options={{
-                  componentRestrictions: { country: "br" },
-                  fields: ["formatted_address", "geometry", "name"],
+                  zoomControl: true,
+                  streetViewControl: false,
+                  mapTypeControl: true,
+                  fullscreenControl: true,
                 }}
               >
-                <Input
-                  ref={searchInputRef}
-                  id="endereco-busca"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  placeholder="Digite o endereço ou nome do local"
-                  className="pl-10"
-                />
-              </Autocomplete>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={getCurrentLocation}
-              title="Usar minha localização atual"
-            >
-              <MapPin className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
+                {marker && (
+                  <Marker
+                    position={marker}
+                    draggable={true}
+                    onDragEnd={(event) => {
+                      if (event.latLng) {
+                        const location = {
+                          lat: event.latLng.lat(),
+                          lng: event.latLng.lng(),
+                        };
 
-        {/* Mapa */}
-        <div className="border rounded-lg overflow-hidden">
-          <GoogleMap
-            mapContainerStyle={mapContainerStyle}
-            center={marker || defaultCenter}
-            zoom={marker ? 17 : 12}
-            onLoad={onLoad}
-            onUnmount={onUnmount}
-            onClick={onMapClick}
-            options={{
-              zoomControl: true,
-              streetViewControl: false,
-              mapTypeControl: true,
-              fullscreenControl: true,
-            }}
-          >
-            {marker && (
-              <Marker
-                position={marker}
-                draggable={true}
-                onDragEnd={(event) => {
-                  if (event.latLng) {
-                    const location = {
-                      lat: event.latLng.lat(),
-                      lng: event.latLng.lng(),
-                    };
+                        setMarker(location);
 
-                    setMarker(location);
-
-                    // Reverse geocoding
-                    const geocoder = new google.maps.Geocoder();
-                    geocoder.geocode({ location }, (results, status) => {
-                      if (status === "OK" && results && results[0]) {
-                        const address = results[0].formatted_address;
-                        setSearchValue(address);
-                        onLocationSelect({
-                          address,
-                          lat: location.lat,
-                          lng: location.lng,
+                        // Reverse geocoding
+                        const geocoder = new google.maps.Geocoder();
+                        geocoder.geocode({ location }, (results, status) => {
+                          if (status === "OK" && results && results[0]) {
+                            const address = results[0].formatted_address;
+                            setSearchValue(address);
+                            setSelectedAddress(address);
+                            setIsAddressConfirmed(true);
+                            onLocationSelect({
+                              address,
+                              lat: location.lat,
+                              lng: location.lng,
+                            });
+                          }
                         });
                       }
-                    });
-                  }
-                }}
-              />
-            )}
-          </GoogleMap>
-        </div>
-
-        <p className="text-xs text-muted-foreground">
-          Clique no mapa ou arraste o marcador para selecionar a localização
-          exata da empresa
-        </p>
-      </LoadScript>
-    </div>
+                    }}
+                  />
+                )}
+              </GoogleMap>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Info className="w-3 h-3" />
+              <span>
+                Clique no mapa ou arraste o marcador para ajustar a posição
+              </span>
+            </div>
+          </div>
+        </LoadScript>
+      </CardContent>
+    </Card>
   );
 }
