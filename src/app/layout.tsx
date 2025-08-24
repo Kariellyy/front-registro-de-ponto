@@ -1,6 +1,4 @@
-import { AuthProvider } from "@/contexts/AuthContext";
-import { SessionProvider } from "@/components/providers/SessionProvider";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ClientProviders } from "@/providers/ClientProviders";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -30,16 +28,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SessionProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem={false}
-            disableTransitionOnChange
-          >
-            <AuthProvider>{children}</AuthProvider>
-          </ThemeProvider>
-        </SessionProvider>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

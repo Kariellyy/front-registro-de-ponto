@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@/components/contexts/AuthContext";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -14,13 +13,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/AuthContext";
 import { Bell, ChevronRight, Home, LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const getBreadcrumbItems = (pathname: string) => {
   const segments = pathname.split("/").filter(Boolean);
-  const items = [{ label: "Home", href: "/empresa", icon: Home }];
+  const items: Array<{
+    label: string;
+    href: string;
+    icon: typeof Home | null;
+  }> = [{ label: "Home", href: "/empresa", icon: Home }];
 
   if (segments.length > 1) {
     const currentPage = segments[1];
@@ -49,7 +53,7 @@ const getBreadcrumbItems = (pathname: string) => {
 export default function Navbar() {
   const pathname = usePathname();
   const breadcrumbItems = getBreadcrumbItems(pathname);
-  const { user, logout } = useAuth();
+  const { user, empresa, logout } = useAuth();
 
   const getInitials = (name: string) => {
     return name
@@ -116,7 +120,7 @@ export default function Navbar() {
                   className="relative h-8 w-8 rounded-full"
                 >
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.photoUrl} alt={user.name} />
+                    <AvatarImage src="" alt={user.name} />
                     <AvatarFallback className="text-xs">
                       {getInitials(user.name)}
                     </AvatarFallback>
@@ -137,7 +141,7 @@ export default function Navbar() {
                         {getRoleLabel(user.role)}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        {user.empresa?.name}
+                        {empresa?.name}
                       </span>
                     </div>
                   </div>
