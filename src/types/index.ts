@@ -1,21 +1,28 @@
 export interface Funcionario {
   id: string;
   nome: string;
-  cpf: string;
   email: string;
-  telefone: string;
-  cargo: string;
-  departamento: string;
-  ativo: boolean;
-  dataAdmissao: Date;
-  horarioTrabalho: {
+  telefone?: string;
+  photoUrl?: string;
+  cpf?: string;
+  cargo?: string;
+  departamentoId?: string;
+  departamento?: {
+    id: string;
+    nome: string;
+    descricao?: string;
+  };
+  dataAdmissao?: string;
+  horarioTrabalho?: {
     entrada: string;
     saida: string;
-    intervalos: {
-      inicio: string;
-      fim: string;
-    }[];
+    intervalos: { inicio: string; fim: string }[];
   };
+  papel: "dono" | "administrador" | "funcionario";
+  status: "ativo" | "inativo" | "suspenso";
+  empresaId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface RegistroPonto {

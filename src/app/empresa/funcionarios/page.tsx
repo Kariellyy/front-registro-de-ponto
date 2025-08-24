@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { LoadingTable } from "@/components/ui/loading";
-import { useFuncionarioActions, useFuncionarios } from "@/hooks/use-funcionarios";
+import { useDepartamentos } from "@/hooks/use-departamentos";
+import {
+  useFuncionarioActions,
+  useFuncionarios,
+} from "@/hooks/use-funcionarios";
 import { Funcionario } from "@/types";
 import {
   AlertCircle,
@@ -17,9 +21,9 @@ import {
   Search,
   Trash2,
   UserCheck,
-  UserX
+  UserX,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 export default function FuncionariosPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,73 +32,81 @@ export default function FuncionariosPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDepartamentoModalOpen, setIsDepartamentoModalOpen] = useState(false);
-  const [selectedFuncionario, setSelectedFuncionario] = useState<Funcionario | null>(null);
-  const [departamentosCompartilhados, setDepartamentosCompartilhados] = useState<string[]>([
-    "Tecnologia", "Produto", "Gestão", "Marketing", "Vendas", "Financeiro", "Recursos Humanos"
-  ]);
-  
-  const { 
-    funcionarios, 
-    loading, 
-    error,
-    refresh 
-  } = useFuncionarios({ 
+  const [selectedFuncionario, setSelectedFuncionario] =
+    useState<Funcionario | null>(null);
+
+  const { funcionarios, loading, error, refresh } = useFuncionarios({
     limit: 10,
-    ...(selectedStatus && { ativo: selectedStatus === "Ativo" })
+    ...(selectedStatus && {
+      status: selectedStatus.toLowerCase() as "ativo" | "inativo" | "suspenso",
+    }),
   });
 
-  const { 
-    loading: actionLoading, 
-    activateFuncionario, 
-    deactivateFuncionario, 
-    deleteFuncionario 
+  const { departamentos } = useDepartamentos();
+
+  const {
+    loading: actionLoading,
+    deleteFuncionario,
+    updateFuncionario,
   } = useFuncionarioActions();
 
   // Filtros locais (você pode mover para o backend depois)
   const filteredFuncionarios = useMemo(() => {
-    return funcionarios.filter(funcionario => {
-      const matchesSearch = !searchTerm || 
+    if (!funcionarios) return [];
+
+    return funcionarios.filter((funcionario) => {
+      const matchesSearch =
+        !searchTerm ||
         funcionario.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
         funcionario.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        funcionario.cpf.includes(searchTerm);
-      
-      const matchesDepartamento = !selectedDepartamento || funcionario.departamento === selectedDepartamento;
-      
-      return matchesSearch && matchesDepartamento;
+        (funcionario.cpf && funcionario.cpf.includes(searchTerm));
+
+      const matchesDepartamento =
+        !selectedDepartamento ||
+        funcionario.departamento?.nome === selectedDepartamento;
+
+      const matchesStatus =
+        !selectedStatus ||
+        (selectedStatus === "Ativo" && funcionario.status === "ativo") ||
+        (selectedStatus === "Inativo" && funcionario.status === "inativo") ||
+        (selectedStatus === "Suspenso" && funcionario.status === "suspenso");
+
+      return matchesSearch && matchesDepartamento && matchesStatus;
     });
-  }, [funcionarios, searchTerm, selectedDepartamento]);
+  }, [funcionarios, searchTerm, selectedDepartamento, selectedStatus]);
 
   // Estatísticas calculadas
   const stats = useMemo(() => {
-    const ativos = funcionarios.filter(f => f.ativo).length;
-    const inativos = funcionarios.filter(f => !f.ativo).length;
-    const departamentos = new Set(funcionarios.map(f => f.departamento)).size;
+    if (!funcionarios) return { ativos: 0, inativos: 0, departamentos: 0 };
+
+    const ativos = funcionarios.filter((f) => f.status === "ativo").length;
+    const inativos = funcionarios.filter(
+      (f) => f.status === "inativo" || f.status === "suspenso"
+    ).length;
+    const departamentos = new Set(
+      funcionarios.map((f) => f.departamento?.nome).filter(Boolean)
+    ).size;
 
     return { ativos, inativos, departamentos };
   }, [funcionarios]);
 
-  // Atualizar departamentos compartilhados quando funcionários mudarem
-  useEffect(() => {
-    const departamentosExistentes = Array.from(new Set(funcionarios.map(f => f.departamento)));
-    setDepartamentosCompartilhados(prev => {
-      const todos = [...new Set([...prev, ...departamentosExistentes])];
-      return todos.filter((dept, index, arr) => arr.indexOf(dept) === index);
-    });
-  }, [funcionarios]);
-
   const handleStatusToggle = async (funcionario: Funcionario) => {
-    const success = funcionario.ativo 
-      ? await deactivateFuncionario(funcionario.id)
-      : await activateFuncionario(funcionario.id);
-    
+    const newStatus = funcionario.status === "ativo" ? "inativo" : "ativo";
+
+    const success = await updateFuncionario(funcionario.id, {
+      status: newStatus,
+    });
+
     if (success) {
       refresh();
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Tem certeza que deseja excluir este funcionário?")) {
-      const success = await deleteFuncionario(id);
+  const handleDelete = async (funcionario: Funcionario) => {
+    const message = `Tem certeza que deseja excluir o funcionário "${funcionario.nome}"?\n\nEsta ação não pode ser desfeita e removerá todos os dados relacionados a este funcionário.`;
+
+    if (confirm(message)) {
+      const success = await deleteFuncionario(funcionario.id);
       if (success) {
         refresh();
       }
@@ -110,7 +122,8 @@ export default function FuncionariosPage() {
     setIsEditModalOpen(true);
   };
 
-  const formatHorario = (horarioTrabalho: Funcionario['horarioTrabalho']) => {
+  const formatHorario = (horarioTrabalho: Funcionario["horarioTrabalho"]) => {
+    if (!horarioTrabalho) return "Não definido";
     return `${horarioTrabalho.entrada} - ${horarioTrabalho.saida}`;
   };
 
@@ -120,7 +133,9 @@ export default function FuncionariosPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Funcionários</h1>
-            <p className="text-muted-foreground">Gerencie os funcionários da empresa</p>
+            <p className="text-muted-foreground">
+              Gerencie os funcionários da empresa
+            </p>
           </div>
         </div>
         <Card>
@@ -144,29 +159,69 @@ export default function FuncionariosPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Funcionários</h1>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refresh}
+            disabled={loading}
+          >
+            <RefreshCw
+              className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
+            />
+            Atualizar
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setIsDepartamentoModalOpen(true)}
           >
             Gerenciar Departamentos
           </Button>
-          <Button className="flex items-center gap-2" onClick={() => setIsCreateModalOpen(true)}>
+          <Button
+            className="flex items-center gap-2"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
             <Plus className="w-4 h-4" />
             Novo Funcionário
           </Button>
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div className="relative w-full max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar funcionário por nome..."
+            placeholder="Buscar funcionário por nome, email ou CPF..."
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedDepartamento}
+            onChange={(e) => setSelectedDepartamento(e.target.value)}
+            className="flex h-9 w-full min-w-[140px] rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="">Todos os departamentos</option>
+            {departamentos.map((dept) => (
+              <option key={dept.id} value={dept.nome}>
+                {dept.nome}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="flex h-9 w-full min-w-[120px] rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="">Todos os status</option>
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+            <option value="Suspenso">Suspenso</option>
+          </select>
         </div>
       </div>
 
@@ -190,8 +245,12 @@ export default function FuncionariosPage() {
                   <UserCheck className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-foreground">{stats.ativos}</div>
-                  <div className="text-sm text-muted-foreground">Funcionários Ativos</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {stats.ativos}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Funcionários Ativos
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -203,8 +262,12 @@ export default function FuncionariosPage() {
                   <UserX className="w-5 h-5 text-destructive" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-foreground">{stats.inativos}</div>
-                  <div className="text-sm text-muted-foreground">Funcionários Inativos</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {stats.inativos}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Funcionários Inativos
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -217,8 +280,12 @@ export default function FuncionariosPage() {
                   <Edit className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-foreground">{stats.departamentos}</div>
-                  <div className="text-sm text-muted-foreground">Departamentos</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {stats.departamentos}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Departamentos
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -234,10 +301,32 @@ export default function FuncionariosPage() {
               <LoadingTable rows={5} />
             </div>
           ) : filteredFuncionarios.length === 0 ? (
-            <div className="p-6 text-center text-muted-foreground">
-              {searchTerm || selectedDepartamento || selectedStatus 
-                ? "Nenhum funcionário encontrado com os filtros aplicados." 
-                : "Nenhum funcionário cadastrado."}
+            <div className="p-12 text-center">
+              <div className="mb-4">
+                <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                  {searchTerm || selectedDepartamento || selectedStatus ? (
+                    <Search className="w-8 h-8 text-muted-foreground" />
+                  ) : (
+                    <Plus className="w-8 h-8 text-muted-foreground" />
+                  )}
+                </div>
+              </div>
+              <h3 className="text-lg font-medium text-foreground mb-2">
+                {searchTerm || selectedDepartamento || selectedStatus
+                  ? "Nenhum funcionário encontrado"
+                  : "Nenhum funcionário cadastrado"}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {searchTerm || selectedDepartamento || selectedStatus
+                  ? "Tente ajustar os filtros ou limpar a busca para ver mais resultados."
+                  : "Comece adicionando seu primeiro funcionário à empresa."}
+              </p>
+              {!searchTerm && !selectedDepartamento && !selectedStatus && (
+                <Button onClick={() => setIsCreateModalOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Primeiro Funcionário
+                </Button>
+              )}
             </div>
           ) : (
             <table className="w-full">
@@ -274,59 +363,83 @@ export default function FuncionariosPage() {
                         <div className="text-sm text-muted-foreground">
                           {funcionario.email}
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          {funcionario.cpf}
-                        </div>
+                        {funcionario.cpf && (
+                          <div className="text-sm text-muted-foreground">
+                            {funcionario.cpf}
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div>
                         <div className="text-sm font-medium text-foreground">
-                          {funcionario.cargo}
+                          {funcionario.cargo || "Não informado"}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {funcionario.departamento}
+                          {funcionario.departamento?.nome || "Não informado"}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-foreground">
-                      {new Date(funcionario.dataAdmissao).toLocaleDateString("pt-BR")}
+                      {funcionario.dataAdmissao
+                        ? new Date(funcionario.dataAdmissao).toLocaleDateString(
+                            "pt-BR"
+                          )
+                        : "Não informado"}
                     </td>
                     <td className="px-6 py-4 text-sm text-foreground">
                       {formatHorario(funcionario.horarioTrabalho)}
                     </td>
                     <td className="px-6 py-4">
-                      <Badge variant={funcionario.ativo ? "default" : "destructive"}>
-                        {funcionario.ativo ? "Ativo" : "Inativo"}
+                      <Badge
+                        variant={
+                          funcionario.status === "ativo"
+                            ? "default"
+                            : "destructive"
+                        }
+                      >
+                        {funcionario.status === "ativo"
+                          ? "Ativo"
+                          : funcionario.status === "inativo"
+                          ? "Inativo"
+                          : "Suspenso"}
                       </Badge>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-blue-600 hover:text-blue-600/70" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-blue-600 hover:text-blue-600/70"
                           title="Editar"
                           onClick={() => handleEdit(funcionario)}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-orange-600 hover:text-orange-600/70" 
-                          title={funcionario.ativo ? "Desativar" : "Ativar"}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-orange-600 hover:text-orange-600/70"
+                          title={
+                            funcionario.status === "ativo"
+                              ? "Desativar"
+                              : "Ativar"
+                          }
                           onClick={() => handleStatusToggle(funcionario)}
                           disabled={actionLoading}
                         >
-                          {funcionario.ativo ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
+                          {funcionario.status === "ativo" ? (
+                            <UserX className="w-4 h-4" />
+                          ) : (
+                            <UserCheck className="w-4 h-4" />
+                          )}
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-destructive hover:text-destructive/70" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive/70"
                           title="Excluir"
-                          onClick={() => handleDelete(funcionario.id)}
+                          onClick={() => handleDelete(funcionario)}
                           disabled={actionLoading}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -341,14 +454,11 @@ export default function FuncionariosPage() {
         </div>
       </Card>
 
-
-
       {/* Modal de Criação */}
       <CreateFuncionarioModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleCreateSuccess}
-        departamentos={departamentosCompartilhados}
       />
 
       {/* Modal de Edição */}
@@ -362,7 +472,6 @@ export default function FuncionariosPage() {
           onSuccess={handleCreateSuccess}
           funcionario={selectedFuncionario}
           isEditing={true}
-          departamentos={departamentosCompartilhados}
         />
       )}
 
@@ -370,14 +479,7 @@ export default function FuncionariosPage() {
       <DepartamentoModal
         isOpen={isDepartamentoModalOpen}
         onClose={() => setIsDepartamentoModalOpen(false)}
-        departamentos={departamentosCompartilhados}
         funcionarios={funcionarios}
-        onDepartamentoAdded={(departamento) => {
-          setDepartamentosCompartilhados(prev => [...prev, departamento]);
-        }}
-        onDepartamentoRemoved={(departamento) => {
-          setDepartamentosCompartilhados(prev => prev.filter(d => d !== departamento));
-        }}
       />
     </div>
   );

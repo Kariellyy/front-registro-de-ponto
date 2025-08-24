@@ -1,6 +1,11 @@
-import { CreateFuncionarioRequest, FuncionariosFilters, funcionariosService, UpdateFuncionarioRequest } from '@/services/funcionarios.service';
-import { Funcionario } from '@/types';
-import { useCallback, useEffect, useState } from 'react';
+import {
+  CreateFuncionarioRequest,
+  FuncionariosFilters,
+  funcionariosService,
+  UpdateFuncionarioRequest,
+} from "@/services/funcionarios.service";
+import { Funcionario } from "@/types";
+import { useCallback, useEffect, useState } from "react";
 
 export function useFuncionarios(initialFilters: FuncionariosFilters = {}) {
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
@@ -19,8 +24,8 @@ export function useFuncionarios(initialFilters: FuncionariosFilters = {}) {
       setLoading(true);
       setError(null);
       const response = await funcionariosService.list(filters);
-      
-      setFuncionarios(response.data);
+
+      setFuncionarios(response.data || []);
       setPagination({
         total: response.total,
         page: response.page,
@@ -28,9 +33,11 @@ export function useFuncionarios(initialFilters: FuncionariosFilters = {}) {
         totalPages: response.totalPages,
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar funcionários';
+      const errorMessage =
+        err instanceof Error ? err.message : "Erro ao carregar funcionários";
       setError(errorMessage);
-      console.error('Erro ao buscar funcionários:', err);
+      console.error("Erro ao buscar funcionários:", err);
+      setFuncionarios([]); // Garantir que sempre seja um array
     } finally {
       setLoading(false);
     }
@@ -40,12 +47,15 @@ export function useFuncionarios(initialFilters: FuncionariosFilters = {}) {
     fetchFuncionarios();
   }, [fetchFuncionarios]);
 
-  const updateFilters = useCallback((newFilters: Partial<FuncionariosFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters, page: 1 }));
-  }, []);
+  const updateFilters = useCallback(
+    (newFilters: Partial<FuncionariosFilters>) => {
+      setFilters((prev) => ({ ...prev, ...newFilters, page: 1 }));
+    },
+    []
+  );
 
   const changePage = useCallback((page: number) => {
-    setFilters(prev => ({ ...prev, page }));
+    setFilters((prev) => ({ ...prev, page }));
   }, []);
 
   const refresh = useCallback(() => {
@@ -76,9 +86,10 @@ export function useFuncionario(id?: string) {
       const data = await funcionariosService.getById(funcionarioId);
       setFuncionario(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar funcionário';
+      const errorMessage =
+        err instanceof Error ? err.message : "Erro ao carregar funcionário";
       setError(errorMessage);
-      console.error('Erro ao buscar funcionário:', err);
+      console.error("Erro ao buscar funcionário:", err);
     } finally {
       setLoading(false);
     }
@@ -102,85 +113,68 @@ export function useFuncionarioActions() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createFuncionario = useCallback(async (data: CreateFuncionarioRequest): Promise<Funcionario | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const funcionario = await funcionariosService.create(data);
-      return funcionario;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao criar funcionário';
-      setError(errorMessage);
-      console.error('Erro ao criar funcionário:', err);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const createFuncionario = useCallback(
+    async (data: CreateFuncionarioRequest): Promise<Funcionario | null> => {
+      try {
+        setLoading(true);
+        setError(null);
+        const funcionario = await funcionariosService.create(data);
+        return funcionario;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Erro ao criar funcionário";
+        setError(errorMessage);
+        console.error("Erro ao criar funcionário:", err);
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
-  const updateFuncionario = useCallback(async (id: string, data: UpdateFuncionarioRequest): Promise<Funcionario | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const funcionario = await funcionariosService.update(id, data);
-      return funcionario;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao atualizar funcionário';
-      setError(errorMessage);
-      console.error('Erro ao atualizar funcionário:', err);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const updateFuncionario = useCallback(
+    async (
+      id: string,
+      data: UpdateFuncionarioRequest
+    ): Promise<Funcionario | null> => {
+      try {
+        setLoading(true);
+        setError(null);
+        const funcionario = await funcionariosService.update(id, data);
+        return funcionario;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Erro ao atualizar funcionário";
+        setError(errorMessage);
+        console.error("Erro ao atualizar funcionário:", err);
+        return null;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
-  const deleteFuncionario = useCallback(async (id: string): Promise<boolean> => {
-    try {
-      setLoading(true);
-      setError(null);
-      await funcionariosService.delete(id);
-      return true;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao excluir funcionário';
-      setError(errorMessage);
-      console.error('Erro ao excluir funcionário:', err);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const activateFuncionario = useCallback(async (id: string): Promise<Funcionario | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const funcionario = await funcionariosService.activate(id);
-      return funcionario;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao ativar funcionário';
-      setError(errorMessage);
-      console.error('Erro ao ativar funcionário:', err);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const deactivateFuncionario = useCallback(async (id: string): Promise<Funcionario | null> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const funcionario = await funcionariosService.deactivate(id);
-      return funcionario;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao desativar funcionário';
-      setError(errorMessage);
-      console.error('Erro ao desativar funcionário:', err);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const deleteFuncionario = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        setLoading(true);
+        setError(null);
+        await funcionariosService.delete(id);
+        return true;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Erro ao excluir funcionário";
+        setError(errorMessage);
+        console.error("Erro ao excluir funcionário:", err);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   return {
     loading,
@@ -188,7 +182,5 @@ export function useFuncionarioActions() {
     createFuncionario,
     updateFuncionario,
     deleteFuncionario,
-    activateFuncionario,
-    deactivateFuncionario,
   };
-} 
+}
