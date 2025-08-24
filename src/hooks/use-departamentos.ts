@@ -1,9 +1,9 @@
 import {
   CreateDepartamentoRequest,
+  Departamento,
   UpdateDepartamentoRequest,
   departamentosService,
 } from "@/services/departamentos.service";
-import { Departamento } from "@/services/departamentos.service";
 import { useCallback, useEffect, useState } from "react";
 
 export function useDepartamentos() {
@@ -37,7 +37,7 @@ export function useDepartamentos() {
         setLoading(true);
         setError(null);
         const departamento = await departamentosService.create(data);
-        setDepartamentos(prev => [...prev, departamento]);
+        setDepartamentos((prev) => [...prev, departamento]);
         return departamento;
       } catch (err) {
         const errorMessage =
@@ -61,8 +61,8 @@ export function useDepartamentos() {
         setLoading(true);
         setError(null);
         const departamento = await departamentosService.update(id, data);
-        setDepartamentos(prev => 
-          prev.map(d => d.id === id ? departamento : d)
+        setDepartamentos((prev) =>
+          prev.map((d) => (d.id === id ? departamento : d))
         );
         return departamento;
       } catch (err) {
@@ -84,7 +84,7 @@ export function useDepartamentos() {
         setLoading(true);
         setError(null);
         await departamentosService.delete(id);
-        setDepartamentos(prev => prev.filter(d => d.id !== id));
+        setDepartamentos((prev) => prev.filter((d) => d.id !== id));
         return true;
       } catch (err) {
         const errorMessage =
@@ -113,4 +113,3 @@ export function useDepartamentos() {
     refresh,
   };
 }
-

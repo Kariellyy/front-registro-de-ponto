@@ -62,10 +62,7 @@ export default function FeriasPage() {
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar funcionário..."
-                  className="pl-10"
-                />
+                <Input placeholder="Buscar funcionário..." className="pl-10" />
               </div>
             </div>
             <select className="px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary bg-background text-foreground">
@@ -103,67 +100,75 @@ export default function FeriasPage() {
                   {funcionarioFerias.periodoAquisitivo}
                 </div>
 
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="bg-primary/10 dark:bg-primary/20 rounded-lg p-2">
-                  <div className="text-lg font-bold text-primary">
-                    {funcionarioFerias.diasDireito}
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="bg-primary/10 dark:bg-primary/20 rounded-lg p-2">
+                    <div className="text-lg font-bold text-primary">
+                      {funcionarioFerias.diasDireito}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Direito</div>
                   </div>
-                  <div className="text-xs text-muted-foreground">Direito</div>
-                </div>
-                <div className="bg-success/10 dark:bg-success/20 rounded-lg p-2">
-                  <div className="text-lg font-bold text-success">
-                    {funcionarioFerias.diasUsados}
+                  <div className="bg-success/10 dark:bg-success/20 rounded-lg p-2">
+                    <div className="text-lg font-bold text-success">
+                      {funcionarioFerias.diasUsados}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Usados</div>
                   </div>
-                  <div className="text-xs text-muted-foreground">Usados</div>
-                </div>
-                <div className="bg-warning/10 dark:bg-warning/20 rounded-lg p-2">
-                  <div className="text-lg font-bold text-warning">
-                    {funcionarioFerias.diasRestantes}
+                  <div className="bg-warning/10 dark:bg-warning/20 rounded-lg p-2">
+                    <div className="text-lg font-bold text-warning">
+                      {funcionarioFerias.diasRestantes}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Restantes
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">Restantes</div>
                 </div>
-              </div>
 
-              {funcionarioFerias.proximoPeriodo ? (
-                <div className="border-t border-border pt-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="w-4 h-4 text-primary" />
-                    <span className="font-medium text-sm text-foreground">Próximas Férias</span>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    <div>
-                      {new Date(
-                        funcionarioFerias.proximoPeriodo.inicio
-                      ).toLocaleDateString("pt-BR")}{" "}
-                      -{" "}
-                      {new Date(
-                        funcionarioFerias.proximoPeriodo.fim
-                      ).toLocaleDateString("pt-BR")}
+                {funcionarioFerias.proximoPeriodo ? (
+                  <div className="border-t border-border pt-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      <span className="font-medium text-sm text-foreground">
+                        Próximas Férias
+                      </span>
                     </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <span>{funcionarioFerias.proximoPeriodo.dias} dias</span>
-                      <Badge
-                        variant={
-                          funcionarioFerias.proximoPeriodo.status === "agendado"
-                            ? "default"
-                            : "success"
-                        }
-                      >
-                        {funcionarioFerias.proximoPeriodo.status === "agendado"
-                          ? "Agendado"
-                          : "Em andamento"}
-                      </Badge>
+                    <div className="text-sm text-muted-foreground">
+                      <div>
+                        {new Date(
+                          funcionarioFerias.proximoPeriodo.inicio
+                        ).toLocaleDateString("pt-BR")}{" "}
+                        -{" "}
+                        {new Date(
+                          funcionarioFerias.proximoPeriodo.fim
+                        ).toLocaleDateString("pt-BR")}
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <span>
+                          {funcionarioFerias.proximoPeriodo.dias} dias
+                        </span>
+                        <Badge
+                          variant={
+                            funcionarioFerias.proximoPeriodo.status ===
+                            "agendado"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {funcionarioFerias.proximoPeriodo.status ===
+                          "agendado"
+                            ? "Agendado"
+                            : "Em andamento"}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="border-t border-border pt-3 text-center text-sm text-muted-foreground">
-                  Nenhuma férias agendada
-                </div>
-              )}
-            </div>
-          </CardContent>
-                  </Card>
+                ) : (
+                  <div className="border-t border-border pt-3 text-center text-sm text-muted-foreground">
+                    Nenhuma férias agendada
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
@@ -180,11 +185,15 @@ export default function FeriasPage() {
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-success">2</div>
-              <div className="text-sm text-muted-foreground">Férias Agendadas</div>
+              <div className="text-sm text-muted-foreground">
+                Férias Agendadas
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-warning">35</div>
-              <div className="text-sm text-muted-foreground">Dias Restantes</div>
+              <div className="text-sm text-muted-foreground">
+                Dias Restantes
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-destructive">1</div>

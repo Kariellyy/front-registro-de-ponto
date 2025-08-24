@@ -14,7 +14,8 @@ export interface CreateDepartamentoRequest {
   descricao?: string;
 }
 
-export interface UpdateDepartamentoRequest extends Partial<CreateDepartamentoRequest> {}
+export interface UpdateDepartamentoRequest
+  extends Partial<CreateDepartamentoRequest> {}
 
 export class DepartamentosService {
   private readonly basePath = "/departamentos";
@@ -31,7 +32,10 @@ export class DepartamentosService {
     return api.post<Departamento>(this.basePath, data);
   }
 
-  async update(id: string, data: UpdateDepartamentoRequest): Promise<Departamento> {
+  async update(
+    id: string,
+    data: UpdateDepartamentoRequest
+  ): Promise<Departamento> {
     return api.patch<Departamento>(`${this.basePath}/${id}`, data);
   }
 
@@ -41,4 +45,3 @@ export class DepartamentosService {
 }
 
 export const departamentosService = new DepartamentosService();
-

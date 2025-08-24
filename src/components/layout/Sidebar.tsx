@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import {
+  Building,
   Calendar,
   ChevronDown,
   Clock,
@@ -65,14 +66,22 @@ const menuItems = [
     icon: MessageSquare,
   },
   {
-    name: "Relatório Contador",
-    href: "/empresa/relatorio-contador",
-    icon: FileText,
-  },
-  {
     name: "Funcionários",
     href: "/empresa/funcionarios",
     icon: Users,
+  },
+];
+
+const adminItems = [
+  {
+    name: "Empresa",
+    href: "#",
+    icon: Building,
+  },
+  {
+    name: "Relatório Contador",
+    href: "/empresa/relatorio-contador",
+    icon: FileText,
   },
 ];
 
@@ -119,6 +128,35 @@ export default function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <SidebarMenuItem key={item.name}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      size="default"
+                    >
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span className="text-sm font-medium">{item.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <div className="px-2 pb-2">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              ADMINISTRATIVO
+            </h3>
+          </div>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {adminItems.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <SidebarMenuItem key={item.name}>
