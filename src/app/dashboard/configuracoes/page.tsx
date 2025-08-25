@@ -350,6 +350,7 @@ export default function ConfiguracoesPage() {
             endereco={formData.endereco}
             latitude={formData.latitude}
             longitude={formData.longitude}
+            isLoading={isLoadingData}
             onLocationSelect={handleLocationSelect}
           />
 

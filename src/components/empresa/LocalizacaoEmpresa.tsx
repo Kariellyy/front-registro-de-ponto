@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle, MapPin, Navigation } from "lucide-react";
 import { useState } from "react";
 import GoogleMapsSelector from "./GoogleMapsSelector";
@@ -10,6 +11,7 @@ interface LocalizacaoEmpresaProps {
   endereco?: string;
   latitude?: number;
   longitude?: number;
+  isLoading?: boolean;
   onLocationSelect: (location: {
     address: string;
     lat: number;
@@ -21,6 +23,7 @@ export function LocalizacaoEmpresa({
   endereco,
   latitude,
   longitude,
+  isLoading = false,
   onLocationSelect,
 }: LocalizacaoEmpresaProps) {
   const [showMap, setShowMap] = useState(false);
@@ -152,7 +155,19 @@ export function LocalizacaoEmpresa({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {hasLocation ? (
+        {isLoading ? (
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <Skeleton className="w-5 h-5 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-48" />
+                <Skeleton className="h-3 w-36" />
+              </div>
+            </div>
+            <Skeleton className="h-10 w-40" />
+          </div>
+        ) : hasLocation ? (
           <div className="space-y-4">
             <div className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
               <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
