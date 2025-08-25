@@ -1,7 +1,7 @@
 "use client";
 
-import GoogleMapsSelector from "@/components/empresa/GoogleMapsSelector";
 import { HorariosSemanaConfig } from "@/components/empresa/HorariosSemanaConfig";
+import { LocalizacaoEmpresa } from "@/components/empresa/LocalizacaoEmpresa";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -346,14 +346,11 @@ export default function ConfiguracoesPage() {
           </Card>
 
           {/* Localização */}
-          <GoogleMapsSelector
+          <LocalizacaoEmpresa
+            endereco={formData.endereco}
+            latitude={formData.latitude}
+            longitude={formData.longitude}
             onLocationSelect={handleLocationSelect}
-            initialLocation={
-              formData.latitude && formData.longitude
-                ? { lat: formData.latitude, lng: formData.longitude }
-                : undefined
-            }
-            initialAddress={formData.endereco}
           />
 
           {/* Horários Flexíveis por Dia da Semana */}
