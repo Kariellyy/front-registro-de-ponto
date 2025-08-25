@@ -146,6 +146,12 @@ export default function GoogleMapsSelector({
 
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 30000,
+      };
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const location = {
@@ -160,26 +166,75 @@ export default function GoogleMapsSelector({
             map.setZoom(17);
           }
 
-          // Reverse geocoding para obter o endereço
-          const geocoder = new google.maps.Geocoder();
-          geocoder.geocode({ location }, (results, status) => {
-            if (status === "OK" && results && results[0]) {
-              const address = results[0].formatted_address;
-              setSearchValue(address);
-              setSelectedAddress(address);
-              setIsAddressConfirmed(true);
-              onLocationSelect({
-                address,
-                lat: location.lat,
-                lng: location.lng,
-              });
-            }
-          });
+          // Reverse geocoding para obter o endereço com retry
+          const performGeocoding = (retryCount = 0) => {
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ location }, (results, status) => {
+              if (status === "OK" && results && results[0]) {
+                const address = results[0].formatted_address;
+                setSearchValue(address);
+                setSelectedAddress(address);
+                setIsAddressConfirmed(true);
+                onLocationSelect({
+                  address,
+                  lat: location.lat,
+                  lng: location.lng,
+                });
+              } else if (retryCount < 2) {
+                // Tentar novamente após 1 segundo
+                console.warn(
+                  `Geocoding falhou (tentativa ${
+                    retryCount + 1
+                  }). Tentando novamente...`
+                );
+                setTimeout(() => performGeocoding(retryCount + 1), 1000);
+              } else {
+                // Fallback: usar coordenadas como endereço
+                const fallbackAddress = `${location.lat.toFixed(
+                  6
+                )}, ${location.lng.toFixed(6)}`;
+                setSearchValue(fallbackAddress);
+                setSelectedAddress(fallbackAddress);
+                setIsAddressConfirmed(true);
+                onLocationSelect({
+                  address: fallbackAddress,
+                  lat: location.lat,
+                  lng: location.lng,
+                });
+                console.warn(
+                  "Geocoding falhou após 3 tentativas. Usando coordenadas como endereço."
+                );
+              }
+            });
+          };
+
+          performGeocoding();
         },
         (error) => {
           console.error("Erro ao obter localização:", error);
-        }
+          let errorMessage = "Erro ao obter localização";
+
+          switch (error.code) {
+            case 1:
+              errorMessage =
+                "Permissão de localização negada. Verifique as configurações do navegador.";
+              break;
+            case 2:
+              errorMessage =
+                "Localização indisponível. Verifique sua conexão com a internet.";
+              break;
+            case 3:
+              errorMessage = "Tempo limite esgotado. Tente novamente.";
+              break;
+          }
+
+          // Mostrar erro para o usuário (você pode usar um toast aqui)
+          alert(errorMessage);
+        },
+        options
       );
+    } else {
+      alert("Geolocalização não é suportada por este navegador.");
     }
   };
 
@@ -307,21 +362,52 @@ export default function GoogleMapsSelector({
 
                       setMarker(location);
 
-                      // Reverse geocoding
-                      const geocoder = new google.maps.Geocoder();
-                      geocoder.geocode({ location }, (results, status) => {
-                        if (status === "OK" && results && results[0]) {
-                          const address = results[0].formatted_address;
-                          setSearchValue(address);
-                          setSelectedAddress(address);
-                          setIsAddressConfirmed(true);
-                          onLocationSelect({
-                            address,
-                            lat: location.lat,
-                            lng: location.lng,
-                          });
-                        }
-                      });
+                      // Reverse geocoding com retry
+                      const performGeocoding = (retryCount = 0) => {
+                        const geocoder = new google.maps.Geocoder();
+                        geocoder.geocode({ location }, (results, status) => {
+                          if (status === "OK" && results && results[0]) {
+                            const address = results[0].formatted_address;
+                            setSearchValue(address);
+                            setSelectedAddress(address);
+                            setIsAddressConfirmed(true);
+                            onLocationSelect({
+                              address,
+                              lat: location.lat,
+                              lng: location.lng,
+                            });
+                          } else if (retryCount < 2) {
+                            // Tentar novamente após 1 segundo
+                            console.warn(
+                              `Geocoding falhou (tentativa ${
+                                retryCount + 1
+                              }). Tentando novamente...`
+                            );
+                            setTimeout(
+                              () => performGeocoding(retryCount + 1),
+                              1000
+                            );
+                          } else {
+                            // Fallback: usar coordenadas como endereço
+                            const fallbackAddress = `${location.lat.toFixed(
+                              6
+                            )}, ${location.lng.toFixed(6)}`;
+                            setSearchValue(fallbackAddress);
+                            setSelectedAddress(fallbackAddress);
+                            setIsAddressConfirmed(true);
+                            onLocationSelect({
+                              address: fallbackAddress,
+                              lat: location.lat,
+                              lng: location.lng,
+                            });
+                            console.warn(
+                              "Geocoding falhou após 3 tentativas. Usando coordenadas como endereço."
+                            );
+                          }
+                        });
+                      };
+
+                      performGeocoding();
                     }
                   }}
                 />

@@ -100,8 +100,14 @@ export function useFuncionarioDashboard() {
         throw new Error("Todos os registros do dia já foram feitos");
       }
 
-      // Obter localização atual
-      const position = await getCurrentPosition();
+      // Obter localização atual com configurações otimizadas
+      const position = await getCurrentPosition({
+        timeout: 15000,
+        enableHighAccuracy: true,
+        maximumAge: 30000,
+        retries: 2,
+        minAccuracy: 50, // 50 metros para registro de ponto
+      });
 
       const novoRegistro = await pontoService.registrarPonto({
         tipo,

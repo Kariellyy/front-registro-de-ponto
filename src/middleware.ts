@@ -19,7 +19,7 @@ export default withAuth(
     }
 
     // Proteger rota /funcionario - apenas funcionários
-    if (path.startsWith("/funcionario") && userRole !== "funcionario") {
+    if (path.startsWith("/ponto") && userRole !== "funcionario") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
@@ -33,5 +33,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/funcionario/:path*"],
+  matcher: ["/dashboard/:path*", "/ponto/:path*"],
 };
