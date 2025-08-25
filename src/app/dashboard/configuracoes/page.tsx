@@ -52,6 +52,7 @@ export default function ConfiguracoesPage() {
   const cnpjInput = useFormattedInput();
   const telefoneInput = useFormattedInput();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
   const horariosDefault = gerarHorariosPadrao();
 
   const [formData, setFormData] = useState<EmpresaForm>({
@@ -76,62 +77,80 @@ export default function ConfiguracoesPage() {
   // Carregar dados completos da empresa via API
   useEffect(() => {
     const loadEmpresaData = async () => {
-      if (empresa?.id) {
+      if (empresa && !isLoadingData) {
+        setIsLoadingData(true);
         try {
-          const empresaCompleta = await empresasService.getEmpresa(empresa.id);
+          const empresaCompleta = await empresasService.getMinhaEmpresa();
 
-          setFormData({
-            nome: empresaCompleta.nome || "",
-            cnpj: empresaCompleta.cnpj || "",
-            email: empresaCompleta.email || "",
-            telefone: empresaCompleta.telefone || "",
-            endereco: empresaCompleta.endereco || "",
-            latitude: empresaCompleta.latitude,
-            longitude: empresaCompleta.longitude,
-            raioPermitido: empresaCompleta.raioPermitido || 100,
-            toleranciaEntrada: empresaCompleta.toleranciaEntrada || 15,
-            toleranciaSaida: empresaCompleta.toleranciaSaida || 15,
-            permitirRegistroForaRaio:
-              empresaCompleta.permitirRegistroForaRaio || false,
-            exigirJustificativaForaRaio:
-              empresaCompleta.exigirJustificativaForaRaio || true,
-            horariosSemanais:
-              empresaCompleta.horariosSemanais || horariosDefault,
-          });
+          // Verificar se os dados foram carregados corretamente
+          if (empresaCompleta && typeof empresaCompleta === "object") {
+            setFormData({
+              nome: empresaCompleta.nome || empresa.name || "",
+              cnpj: empresaCompleta.cnpj || empresa.cnpj || "",
+              email: empresaCompleta.email || empresa.email || "",
+              telefone: empresaCompleta.telefone || empresa.telefone || "",
+              endereco: empresaCompleta.endereco || "",
+              latitude: empresaCompleta.latitude,
+              longitude: empresaCompleta.longitude,
+              raioPermitido: empresaCompleta.raioPermitido || 100,
+              toleranciaEntrada: empresaCompleta.toleranciaEntrada || 15,
+              toleranciaSaida: empresaCompleta.toleranciaSaida || 15,
+              permitirRegistroForaRaio:
+                empresaCompleta.permitirRegistroForaRaio || false,
+              exigirJustificativaForaRaio:
+                empresaCompleta.exigirJustificativaForaRaio || true,
+              horariosSemanais:
+                empresaCompleta.horariosSemanais || horariosDefault,
+            });
 
-          // Configurar CNPJ formatado
-          if (empresaCompleta.cnpj) {
-            cnpjInput.setValue(formatCNPJ(empresaCompleta.cnpj));
-          }
+            // Configurar CNPJ formatado
+            if (empresaCompleta.cnpj) {
+              cnpjInput.setValue(formatCNPJ(empresaCompleta.cnpj));
+            }
 
-          // Configurar telefone formatado
-          if (empresaCompleta.telefone) {
-            telefoneInput.setValue(formatTelefone(empresaCompleta.telefone));
+            // Configurar telefone formatado
+            if (empresaCompleta.telefone) {
+              telefoneInput.setValue(formatTelefone(empresaCompleta.telefone));
+            }
+          } else {
+            throw new Error("Dados da empresa não encontrados");
           }
         } catch (error) {
           console.error("Erro ao carregar dados da empresa:", error);
           // Fallback para dados do contexto
-          setFormData({
-            nome: empresa.name || "",
-            cnpj: empresa.cnpj || "",
-            email: empresa.email || "",
-            telefone: empresa.telefone || "",
-            endereco: "",
-            latitude: undefined,
-            longitude: undefined,
-            raioPermitido: 100,
-            toleranciaEntrada: 15,
-            toleranciaSaida: 15,
-            permitirRegistroForaRaio: false,
-            exigirJustificativaForaRaio: true,
-            horariosSemanais: horariosDefault,
-          });
+          if (empresa) {
+            setFormData({
+              nome: empresa.name || "",
+              cnpj: empresa.cnpj || "",
+              email: empresa.email || "",
+              telefone: empresa.telefone || "",
+              endereco: "",
+              latitude: undefined,
+              longitude: undefined,
+              raioPermitido: 100,
+              toleranciaEntrada: 15,
+              toleranciaSaida: 15,
+              permitirRegistroForaRaio: false,
+              exigirJustificativaForaRaio: true,
+              horariosSemanais: horariosDefault,
+            });
+
+            // Configurar campos formatados com dados do contexto
+            if (empresa.cnpj) {
+              cnpjInput.setValue(formatCNPJ(empresa.cnpj));
+            }
+            if (empresa.telefone) {
+              telefoneInput.setValue(formatTelefone(empresa.telefone));
+            }
+          }
+        } finally {
+          setIsLoadingData(false);
         }
       }
     };
 
     loadEmpresaData();
-  }, [empresa?.id]);
+  }, [empresa]);
 
   const formatCNPJ = (cnpj: string) => {
     const numbers = cnpj.replace(/\D/g, "");
