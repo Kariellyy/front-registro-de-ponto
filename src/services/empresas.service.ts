@@ -9,6 +9,18 @@ export interface HorarioDia {
   intervaloFim?: string;
 }
 
+export interface HorarioEmpresa {
+  id?: string;
+  diaSemana: number;
+  ativo: boolean;
+  horarioInicio: string | null;
+  horarioFim: string | null;
+  temIntervalo: boolean;
+  intervaloInicio?: string | null;
+  intervaloFim?: string | null;
+  empresaId?: string;
+}
+
 export interface EmpresaCompleta {
   id: string;
   nome: string;
@@ -23,7 +35,8 @@ export interface EmpresaCompleta {
   toleranciaSaida?: number;
   permitirRegistroForaRaio?: boolean;
   exigirJustificativaForaRaio?: boolean;
-  horariosSemanais?: { [diaSemana: string]: HorarioDia };
+  horarios?: HorarioEmpresa[];
+  horariosSemanais?: { [diaSemana: string]: HorarioDia }; // Backward compatibility
   createdAt: string;
   updatedAt: string;
 }
@@ -41,7 +54,67 @@ export interface UpdateEmpresaRequest {
   toleranciaSaida?: number;
   permitirRegistroForaRaio?: boolean;
   exigirJustificativaForaRaio?: boolean;
-  horariosSemanais?: { [diaSemana: string]: HorarioDia };
+  horarios?: HorarioEmpresa[];
+}
+
+// Funções de utilidade para converter entre formatos
+export function horariosArrayToObject(horarios: HorarioEmpresa[]): {
+  [diaSemana: string]: HorarioDia;
+} {
+  const result: { [diaSemana: string]: HorarioDia } = {};
+
+  horarios.forEach((horario) => {
+    // Converter formato HH:MM:SS para HH:MM se necessário
+    const formatTime = (time: string | null): string => {
+      if (!time) return "";
+      return time.length === 8 ? time.substring(0, 5) : time;
+    };
+
+    result[horario.diaSemana.toString()] = {
+      ativo: horario.ativo,
+      inicio: formatTime(horario.horarioInicio),
+      fim: formatTime(horario.horarioFim),
+      temIntervalo: horario.temIntervalo,
+      intervaloInicio: formatTime(horario.intervaloInicio || null),
+      intervaloFim: formatTime(horario.intervaloFim || null),
+    };
+  });
+
+  return result;
+}
+
+export function horariosObjectToArray(horariosObj: {
+  [diaSemana: string]: HorarioDia;
+}): HorarioEmpresa[] {
+  const result: HorarioEmpresa[] = [];
+
+  Object.entries(horariosObj).forEach(([diaSemana, horario]) => {
+    // Converter formato HH:MM para HH:MM:SS para o backend
+    const formatTimeForBackend = (time: string): string | null => {
+      if (!time || time === "") return null;
+      return time.length === 5 ? `${time}:00` : time;
+    };
+
+    result.push({
+      diaSemana: parseInt(diaSemana),
+      ativo: horario.ativo,
+      horarioInicio: horario.ativo
+        ? formatTimeForBackend(horario.inicio)
+        : null,
+      horarioFim: horario.ativo ? formatTimeForBackend(horario.fim) : null,
+      temIntervalo: horario.ativo ? horario.temIntervalo : false,
+      intervaloInicio:
+        horario.ativo && horario.temIntervalo
+          ? formatTimeForBackend(horario.intervaloInicio || "")
+          : null,
+      intervaloFim:
+        horario.ativo && horario.temIntervalo
+          ? formatTimeForBackend(horario.intervaloFim || "")
+          : null,
+    });
+  });
+
+  return result.sort((a, b) => a.diaSemana - b.diaSemana);
 }
 
 class EmpresasService {
@@ -61,6 +134,11 @@ class EmpresasService {
         throw new Error("Dados da empresa não encontrados");
       }
 
+      // Converter horários para formato compatível se necessário
+      if (data.horarios && data.horarios.length > 0) {
+        data.horariosSemanais = horariosArrayToObject(data.horarios);
+      }
+
       return data;
     } catch (error) {
       console.error("Erro ao buscar empresa:", error);
@@ -77,6 +155,25 @@ class EmpresasService {
       if (!data) {
         console.error("API retornou dados vazios:", data);
         throw new Error("Dados da empresa não encontrados");
+      }
+
+      // SEMPRE converter horários para formato compatível com o frontend
+      if (
+        data.horarios &&
+        Array.isArray(data.horarios) &&
+        data.horarios.length > 0
+      ) {
+        console.log("Horários do backend:", data.horarios);
+        data.horariosSemanais = horariosArrayToObject(data.horarios);
+        console.log(
+          "Horários convertidos para frontend:",
+          data.horariosSemanais
+        );
+      } else {
+        console.warn(
+          "Nenhum horário encontrado na resposta da API",
+          data.horarios
+        );
       }
 
       return data;

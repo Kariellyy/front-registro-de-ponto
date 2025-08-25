@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDepartamentos } from "@/hooks/use-departamentos";
 import { useFuncionarioActions } from "@/hooks/use-funcionarios";
 import { gerarHorariosPadrao } from "@/lib/horarios";
+import { empresasService } from "@/services/empresas.service";
 import {
   CreateFuncionarioRequest,
   UpdateFuncionarioRequest,
@@ -85,6 +86,8 @@ export function CreateFuncionarioModal({
     gerarHorariosPadrao()
   );
   const [cargaHorariaSemanal, setCargaHorariaSemanal] = useState(40);
+  const [horariosEmpresa, setHorariosEmpresa] = useState(gerarHorariosPadrao());
+  const [isLoadingEmpresa, setIsLoadingEmpresa] = useState(false);
   const toast = useToast();
 
   const {
@@ -127,6 +130,53 @@ export function CreateFuncionarioModal({
       setValue("cargaHorariaSemanal", cargaCarregada);
     }
   }, [isEditing, funcionario, setValue]);
+
+  // Carregar horários completos da empresa quando o modal abrir
+  useEffect(() => {
+    const loadEmpresaHorarios = async () => {
+      if (isOpen && empresa && !isLoadingEmpresa) {
+        setIsLoadingEmpresa(true);
+        try {
+          const empresaCompleta = await empresasService.getMinhaEmpresa();
+          if (empresaCompleta.horariosSemanais) {
+            setHorariosEmpresa(empresaCompleta.horariosSemanais);
+
+            // Para funcionários novos (não editando), usar horários da empresa como padrão
+            // mas sempre ativar intervalo com horário 11:00-13:00
+            if (!isEditing) {
+              const horariosComIntervalo = {
+                ...empresaCompleta.horariosSemanais,
+              };
+
+              // Ativar intervalo para todos os dias ativos
+              Object.keys(horariosComIntervalo).forEach((dia) => {
+                if (horariosComIntervalo[dia].ativo) {
+                  horariosComIntervalo[dia] = {
+                    ...horariosComIntervalo[dia],
+                    temIntervalo: true,
+                    intervaloInicio: "11:00",
+                    intervaloFim: "13:00",
+                  };
+                }
+              });
+
+              setHorariosFuncionario(horariosComIntervalo);
+              setValue("horariosFuncionario", horariosComIntervalo);
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao carregar horários da empresa:", error);
+          // Manter horários padrão em caso de erro
+        } finally {
+          setIsLoadingEmpresa(false);
+        }
+      }
+    };
+
+    if (isOpen) {
+      loadEmpresaHorarios();
+    }
+  }, [isOpen, empresa?.id]);
 
   const {
     register: registerDepartamento,
@@ -209,6 +259,7 @@ export function CreateFuncionarioModal({
     reset();
     setHorariosFuncionario(gerarHorariosPadrao());
     setCargaHorariaSemanal(40);
+    setHorariosEmpresa(gerarHorariosPadrao());
     onClose();
   };
 
@@ -424,9 +475,7 @@ export function CreateFuncionarioModal({
               {/* Horários de Trabalho */}
               <HorariosFuncionarioConfig
                 horarios={horariosFuncionario}
-                horariosEmpresa={
-                  empresa?.horariosSemanais || gerarHorariosPadrao()
-                }
+                horariosEmpresa={horariosEmpresa}
                 onChange={(novosHorarios, novaCarga) => {
                   setHorariosFuncionario(novosHorarios);
                   setCargaHorariaSemanal(novaCarga);

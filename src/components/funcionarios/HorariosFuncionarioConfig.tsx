@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
   calcularCargaHorariaSemanal,
+  calcularHorasDia,
   diasSemanaLabels,
   gerarHorariosPadrao,
   validarHorario,
@@ -197,7 +198,11 @@ export function HorariosFuncionarioConfig({
             >
               Usar Horários da Empresa
             </Button>
-            <div className="text-sm font-medium">
+            <div
+              className={`text-sm font-medium ${
+                calcularCargaHoraria() > 44 ? "text-red-500" : ""
+              }`}
+            >
               <Clock className="w-4 h-4 inline mr-1" />
               {calcularCargaHoraria()}h semanais
             </div>
@@ -246,6 +251,11 @@ export function HorariosFuncionarioConfig({
                     disabled={!horarioEmpresa?.ativo}
                   />
                   <Label className="font-medium">{dia.nome}</Label>
+                  {horario.ativo && (
+                    <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                      {calcularHorasDia(horario).toFixed(1)}h
+                    </span>
+                  )}
                   {!horarioEmpresa?.ativo && (
                     <span className="text-xs text-red-500">
                       (Empresa fechada)

@@ -11,7 +11,10 @@ import { useToast } from "@/components/ui/toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFormattedInput } from "@/hooks/use-formatted-input";
 import { gerarHorariosPadrao } from "@/lib/horarios";
-import { empresasService } from "@/services/empresas.service";
+import {
+  empresasService,
+  horariosObjectToArray,
+} from "@/services/empresas.service";
 import { Building, Save, Settings } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -53,6 +56,7 @@ export default function ConfiguracoesPage() {
   const telefoneInput = useFormattedInput();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const horariosDefault = gerarHorariosPadrao();
 
   const [formData, setFormData] = useState<EmpresaForm>({
@@ -84,6 +88,11 @@ export default function ConfiguracoesPage() {
 
           // Verificar se os dados foram carregados corretamente
           if (empresaCompleta && typeof empresaCompleta === "object") {
+            console.log(
+              "Horários semanais recebidos:",
+              empresaCompleta.horariosSemanais
+            );
+
             setFormData({
               nome: empresaCompleta.nome || empresa.name || "",
               cnpj: empresaCompleta.cnpj || empresa.cnpj || "",
@@ -150,7 +159,7 @@ export default function ConfiguracoesPage() {
     };
 
     loadEmpresaData();
-  }, [empresa]);
+  }, [empresa, refreshTrigger]);
 
   const formatCNPJ = (cnpj: string) => {
     const numbers = cnpj.replace(/\D/g, "");
@@ -222,13 +231,16 @@ export default function ConfiguracoesPage() {
         toleranciaSaida: formData.toleranciaSaida,
         permitirRegistroForaRaio: formData.permitirRegistroForaRaio,
         exigirJustificativaForaRaio: formData.exigirJustificativaForaRaio,
-        horariosSemanais: formData.horariosSemanais,
+        horarios: horariosObjectToArray(formData.horariosSemanais),
       };
 
       await empresasService.updateEmpresa(empresa?.id!, updateData);
 
       toast.success("Configurações da empresa atualizadas com sucesso!");
       await refreshUser();
+
+      // Recarregar dados da empresa para garantir que estejam atualizados
+      setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error("Erro ao atualizar empresa:", error);
       toast.error("Erro ao atualizar configurações. Tente novamente.");

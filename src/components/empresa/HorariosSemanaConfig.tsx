@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { calcularCargaHorariaSemanal, diasSemanaLabels } from "@/lib/horarios";
 import { Calendar, Clock } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface HorarioDia {
   ativo: boolean;
@@ -34,6 +34,11 @@ export function HorariosSemanaConfig({
   subtitle = "Configure os horários para cada dia da semana",
 }: HorariosSemanaConfigProps) {
   const [localHorarios, setLocalHorarios] = useState(horarios);
+
+  // Sincronizar estado local quando as props mudam
+  useEffect(() => {
+    setLocalHorarios(horarios);
+  }, [horarios]);
 
   const updateHorario = (dia: string, campo: keyof HorarioDia, valor: any) => {
     const novosHorarios = {
