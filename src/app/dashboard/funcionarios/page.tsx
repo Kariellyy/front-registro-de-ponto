@@ -2,6 +2,7 @@
 
 import { CreateFuncionarioModal } from "@/components/funcionarios/CreateFuncionarioModal";
 import { DepartamentoModal } from "@/components/funcionarios/DepartamentoModal";
+import { HorariosFuncionarioModal } from "@/components/funcionarios/HorariosFuncionarioModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import {
 import { Funcionario } from "@/types";
 import {
   AlertCircle,
+  Clock,
   Edit,
   Plus,
   RefreshCw,
@@ -34,6 +36,9 @@ export default function FuncionariosPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDepartamentoModalOpen, setIsDepartamentoModalOpen] = useState(false);
   const [selectedFuncionario, setSelectedFuncionario] =
+    useState<Funcionario | null>(null);
+  const [isHorariosModalOpen, setIsHorariosModalOpen] = useState(false);
+  const [selectedFuncionarioHorarios, setSelectedFuncionarioHorarios] =
     useState<Funcionario | null>(null);
 
   const { funcionarios, loading, error, refresh } = useFuncionarios({
@@ -134,11 +139,16 @@ export default function FuncionariosPage() {
     setIsEditModalOpen(true);
   };
 
+  const handleViewHorarios = (funcionario: Funcionario) => {
+    setSelectedFuncionarioHorarios(funcionario);
+    setIsHorariosModalOpen(true);
+  };
+
   const formatHorario = (
     horariosFuncionario: Funcionario["horariosFuncionario"],
     cargaHorariaSemanal?: number
   ) => {
-    if (!horariosFuncionario || !cargaHorariaSemanal) return "Não definido";
+    if (!horariosFuncionario || !cargaHorariaSemanal) return "";
 
     const diasAtivos = Object.values(horariosFuncionario).filter(
       (h) => h.ativo
@@ -397,11 +407,25 @@ export default function FuncionariosPage() {
                             ).toLocaleDateString("pt-BR")
                           : "Não informado"}
                       </td>
-                      <td className="px-6 py-4 text-sm text-foreground">
-                        {formatHorario(
-                          funcionario.horariosFuncionario,
-                          funcionario.cargaHorariaSemanal
-                        )}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-foreground">
+                            {formatHorario(
+                              funcionario.horariosFuncionario,
+                              funcionario.cargaHorariaSemanal
+                            )}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-blue-600 hover:text-blue-600/70"
+                            title="Ver Horários"
+                            onClick={() => handleViewHorarios(funcionario)}
+                          >
+                            <Clock className="w-4 h-4 mr-1" />
+                            Ver Horários
+                          </Button>
+                        </div>
                       </td>
                       <td className="px-6 py-4">
                         <Badge
@@ -493,6 +517,16 @@ export default function FuncionariosPage() {
           isOpen={isDepartamentoModalOpen}
           onClose={() => setIsDepartamentoModalOpen(false)}
           funcionarios={funcionarios}
+        />
+
+        {/* Modal de Horários do Funcionário */}
+        <HorariosFuncionarioModal
+          isOpen={isHorariosModalOpen}
+          onClose={() => {
+            setIsHorariosModalOpen(false);
+            setSelectedFuncionarioHorarios(null);
+          }}
+          funcionario={selectedFuncionarioHorarios}
         />
       </div>
     </>

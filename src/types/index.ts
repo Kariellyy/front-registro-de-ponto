@@ -23,6 +23,19 @@ export interface Funcionario {
       intervaloFim?: string;
     };
   };
+  horarios?: {
+    id: string;
+    diaSemana: number;
+    ativo: boolean;
+    horarioInicio: string | null;
+    horarioFim: string | null;
+    temIntervalo: boolean;
+    intervaloInicio: string | null;
+    intervaloFim: string | null;
+    usuarioId: string;
+    createdAt: string;
+    updatedAt: string;
+  }[];
   cargaHorariaSemanal?: number;
   papel: "dono" | "administrador" | "funcionario";
   status: "ativo" | "inativo" | "suspenso";
