@@ -23,12 +23,17 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Buscar a chave da API no servidor (não exposta no bundle do cliente)
+  const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
+
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClientProviders>{children}</ClientProviders>
+        <ClientProviders googleMapsApiKey={googleMapsApiKey}>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );

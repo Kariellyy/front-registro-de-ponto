@@ -2,14 +2,19 @@
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { GoogleMapsProvider } from "@/contexts/GoogleMapsContext";
 import { SessionProvider } from "next-auth/react";
 import { ReactNode } from "react";
 
 interface ClientProvidersProps {
   children: ReactNode;
+  googleMapsApiKey?: string;
 }
 
-export function ClientProviders({ children }: ClientProvidersProps) {
+export function ClientProviders({
+  children,
+  googleMapsApiKey,
+}: ClientProvidersProps) {
   return (
     <SessionProvider>
       <ThemeProvider
@@ -18,7 +23,11 @@ export function ClientProviders({ children }: ClientProvidersProps) {
         enableSystem={false}
         disableTransitionOnChange
       >
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <GoogleMapsProvider apiKey={googleMapsApiKey}>
+            {children}
+          </GoogleMapsProvider>
+        </AuthProvider>
       </ThemeProvider>
     </SessionProvider>
   );
