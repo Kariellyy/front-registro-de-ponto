@@ -47,8 +47,8 @@ export interface UpdateEmpresaRequest {
   email?: string;
   telefone?: string;
   endereco?: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | null;
+  longitude?: number | null;
   raioPermitido?: number;
   toleranciaEntrada?: number;
   toleranciaSaida?: number;

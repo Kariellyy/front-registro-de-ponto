@@ -34,8 +34,8 @@ interface EmpresaForm {
   email: string;
   telefone: string;
   endereco: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | null;
+  longitude?: number | null;
   raioPermitido: number;
 
   // Tolerâncias
@@ -99,8 +99,16 @@ export default function ConfiguracoesPage() {
               email: empresaCompleta.email || empresa.email || "",
               telefone: empresaCompleta.telefone || empresa.telefone || "",
               endereco: empresaCompleta.endereco || "",
-              latitude: empresaCompleta.latitude,
-              longitude: empresaCompleta.longitude,
+              latitude:
+                typeof empresaCompleta.latitude === "string" ||
+                typeof empresaCompleta.latitude === "number"
+                  ? Number(empresaCompleta.latitude)
+                  : null,
+              longitude:
+                typeof empresaCompleta.longitude === "string" ||
+                typeof empresaCompleta.longitude === "number"
+                  ? Number(empresaCompleta.longitude)
+                  : null,
               raioPermitido: empresaCompleta.raioPermitido || 100,
               toleranciaEntrada: empresaCompleta.toleranciaEntrada || 15,
               toleranciaSaida: empresaCompleta.toleranciaSaida || 15,

@@ -9,8 +9,8 @@ import GoogleMapsSelector from "./GoogleMapsSelector";
 
 interface LocalizacaoEmpresaProps {
   endereco?: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | null;
+  longitude?: number | null;
   isLoading?: boolean;
   onLocationSelect: (location: {
     address: string;
@@ -44,7 +44,7 @@ export function LocalizacaoEmpresa({
   const handleRedefineLocation = () => {
     setShowMap(true);
     setIsEditing(true);
-    // Inicializar com a localização atual
+    // Inicializar com a localização atual se existir
     if (
       endereco &&
       latitude !== null &&
@@ -57,6 +57,9 @@ export function LocalizacaoEmpresa({
         lat: Number(latitude),
         lng: Number(longitude),
       });
+    } else {
+      // Se não há localização inicial, limpar tempLocation
+      setTempLocation(null);
     }
   };
 
@@ -110,37 +113,35 @@ export function LocalizacaoEmpresa({
             }
             initialAddress={tempLocation?.address || endereco}
           />
-          {isEditing && (
-            <div className="space-y-4">
-              {tempLocation && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-blue-800 mb-1">
-                        Nova Localização Selecionada
-                      </p>
-                      <p className="text-sm text-blue-700">
-                        {tempLocation.address}
-                      </p>
-                      <p className="text-xs text-blue-600">
-                        Latitude: {tempLocation.lat.toFixed(6)} | Longitude:{" "}
-                        {tempLocation.lng.toFixed(6)}
-                      </p>
-                    </div>
+          <div className="space-y-4">
+            {tempLocation && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-800 mb-1">
+                      Nova Localização Selecionada
+                    </p>
+                    <p className="text-sm text-blue-700">
+                      {tempLocation.address}
+                    </p>
+                    <p className="text-xs text-blue-600">
+                      Latitude: {tempLocation.lat.toFixed(6)} | Longitude:{" "}
+                      {tempLocation.lng.toFixed(6)}
+                    </p>
                   </div>
                 </div>
-              )}
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={handleCancelEdit}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleSaveLocation} disabled={!tempLocation}>
-                  Salvar Localização
-                </Button>
               </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={handleCancelEdit}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSaveLocation} disabled={!tempLocation}>
+                Salvar Localização
+              </Button>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
     );
@@ -218,7 +219,11 @@ export function LocalizacaoEmpresa({
             </div>
 
             <Button
-              onClick={() => setShowMap(true)}
+              onClick={() => {
+                setShowMap(true);
+                setIsEditing(false);
+                setTempLocation(null);
+              }}
               className="flex items-center gap-2"
             >
               <MapPin className="w-4 h-4" />
