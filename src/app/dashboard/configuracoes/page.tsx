@@ -12,8 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useFormattedInput } from "@/hooks/use-formatted-input";
 import { gerarHorariosPadrao } from "@/lib/horarios";
 import {
-  empresasService,
-  horariosObjectToArray,
+    empresasService,
+    horariosObjectToArray,
 } from "@/services/empresas.service";
 import { Building, Save, Settings } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -397,11 +397,11 @@ export default function ConfiguracoesPage() {
                         type="number"
                         min="0"
                         max="60"
-                        value={formData.toleranciaEntrada}
+                        value={formData.toleranciaEntrada || ""}
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,
-                            toleranciaEntrada: parseInt(e.target.value) || 0,
+                            toleranciaEntrada: e.target.value === "" ? 0 : parseInt(e.target.value) || 0,
                           }))
                         }
                         placeholder="15"
@@ -420,11 +420,11 @@ export default function ConfiguracoesPage() {
                         type="number"
                         min="0"
                         max="60"
-                        value={formData.toleranciaSaida}
+                        value={formData.toleranciaSaida || ""}
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,
-                            toleranciaSaida: parseInt(e.target.value) || 0,
+                            toleranciaSaida: e.target.value === "" ? 0 : parseInt(e.target.value) || 0,
                           }))
                         }
                         placeholder="15"
@@ -448,11 +448,11 @@ export default function ConfiguracoesPage() {
                         type="number"
                         min="10"
                         max="1000"
-                        value={formData.raioPermitido}
+                        value={formData.raioPermitido || ""}
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,
-                            raioPermitido: parseInt(e.target.value) || 100,
+                            raioPermitido: e.target.value === "" ? 0 : parseInt(e.target.value) || 0,
                           }))
                         }
                         placeholder="100"
