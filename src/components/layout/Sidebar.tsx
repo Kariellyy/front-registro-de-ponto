@@ -4,36 +4,36 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
+    Sidebar,
+    SidebarContent,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Building,
-  Calendar,
-  ChevronDown,
-  Clock,
-  FileText,
-  LayoutDashboard,
-  LogOut,
-  MessageSquare,
-  Settings,
-  User,
-  Users,
-  UserX,
+    Building,
+    Calendar,
+    ChevronDown,
+    Clock,
+    FileText,
+    LayoutDashboard,
+    LogOut,
+    MessageSquare,
+    Settings,
+    User,
+    Users,
+    UserX,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -183,23 +183,23 @@ export default function AppSidebar() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="w-full justify-between gap-2 h-auto p-2"
+                  className="w-full justify-between gap-2 h-auto p-2 min-w-0"
                 >
-                  <div className="flex items-center gap-2">
-                    <Avatar className="w-8 h-8">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <Avatar className="w-8 h-8 flex-shrink-0">
                       <AvatarImage src="" alt={user.name} />
                       <AvatarFallback className="text-xs">
                         {getInitials(user.name)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm font-medium">{user.name}</span>
-                      <span className="text-xs text-muted-foreground">
+                    <div className="flex flex-col items-start min-w-0 flex-1">
+                      <span className="text-sm font-medium truncate w-full">{user.name}</span>
+                      <span className="text-xs text-muted-foreground truncate w-full">
                         {user.email}
                       </span>
                     </div>
                   </div>
-                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
