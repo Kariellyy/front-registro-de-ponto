@@ -75,7 +75,8 @@ export default function FuncionariosPage() {
 
       const matchesDepartamento =
         !selectedDepartamento ||
-        funcionario.departamento?.nome === selectedDepartamento;
+        funcionario.informacoesTrabalhistas?.departamento?.nome ===
+          selectedDepartamento;
 
       const matchesStatus =
         !selectedStatus ||
@@ -96,7 +97,9 @@ export default function FuncionariosPage() {
       (f) => f.status === "inativo" || f.status === "suspenso"
     ).length;
     const departamentos = new Set(
-      funcionarios.map((f) => f.departamento?.nome).filter(Boolean)
+      funcionarios
+        .map((f) => f.informacoesTrabalhistas?.departamento?.nome)
+        .filter(Boolean)
     ).size;
 
     return { ativos, inativos, departamentos };
@@ -381,17 +384,19 @@ export default function FuncionariosPage() {
                       <td className="px-6 py-4">
                         <div>
                           <div className="text-sm font-medium text-foreground">
-                            {funcionario.departamento?.nome || "Não informado"}
+                            {funcionario.informacoesTrabalhistas?.departamento
+                              ?.nome || "Não informado"}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {funcionario.cargo?.nome || "Não informado"}
+                            {funcionario.informacoesTrabalhistas?.cargo?.nome ||
+                              "Não informado"}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-foreground">
-                        {funcionario.dataAdmissao
+                        {funcionario.informacoesTrabalhistas?.dataAdmissao
                           ? new Date(
-                              funcionario.dataAdmissao
+                              funcionario.informacoesTrabalhistas.dataAdmissao
                             ).toLocaleDateString("pt-BR")
                           : "Não informado"}
                       </td>
@@ -400,7 +405,8 @@ export default function FuncionariosPage() {
                           <span className="text-sm text-foreground">
                             {formatHorario(
                               funcionario.horariosFuncionario,
-                              funcionario.cargaHorariaSemanal
+                              funcionario.informacoesTrabalhistas
+                                ?.cargaHorariaSemanal
                             )}
                           </span>
                           <Button

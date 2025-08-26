@@ -215,10 +215,10 @@ export default function DepartamentosPage() {
                   {departamentos.map((d) => {
                     const isActive = d.id === selectedDeptId;
                     return (
-                      <button
+                      <div
                         key={d.id}
                         onClick={() => setSelectedDeptId(d.id)}
-                        className={`w-full text-left px-3 py-2 rounded-md transition-colors border ${
+                        className={`w-full text-left px-3 py-2 rounded-md transition-colors border cursor-pointer ${
                           isActive
                             ? "bg-primary/10 border-primary/30 text-primary"
                             : "hover:bg-muted border-transparent"
@@ -258,7 +258,7 @@ export default function DepartamentosPage() {
                             {d.descricao}
                           </p>
                         )}
-                      </button>
+                      </div>
                     );
                   })}
                   {departamentos.length === 0 && (
@@ -298,10 +298,10 @@ export default function DepartamentosPage() {
                     {departamentos.map((d) => {
                       const isActive = d.id === selectedDeptId;
                       return (
-                        <button
+                        <div
                           key={d.id}
                           onClick={() => setSelectedDeptId(d.id)}
-                          className={`w-full text-left px-3 py-2 rounded-md transition-colors border ${
+                          className={`w-full text-left px-3 py-2 rounded-md transition-colors border cursor-pointer ${
                             isActive
                               ? "bg-primary/10 border-primary/30 text-primary"
                               : "hover:bg-muted border-transparent"
@@ -343,7 +343,7 @@ export default function DepartamentosPage() {
                               {d.descricao}
                             </p>
                           )}
-                        </button>
+                        </div>
                       );
                     })}
                     {departamentos.length === 0 && (

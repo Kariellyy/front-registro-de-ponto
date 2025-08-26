@@ -1,3 +1,26 @@
+export interface InformacoesTrabalhistas {
+  id: string;
+  usuarioId: string;
+  cargoId: string;
+  cargo: {
+    id: string;
+    nome: string;
+    descricao?: string;
+    baseSalarial?: number;
+  };
+  departamentoId: string;
+  departamento: {
+    id: string;
+    nome: string;
+    descricao?: string;
+  };
+  dataAdmissao: string;
+  inicioRegistros: string;
+  cargaHorariaSemanal: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Funcionario {
   id: string;
   nome: string;
@@ -5,20 +28,7 @@ export interface Funcionario {
   telefone?: string;
   photoUrl?: string;
   cpf?: string;
-  cargoId?: string;
-  cargo?: {
-    id: string;
-    nome: string;
-    descricao?: string;
-    baseSalarial?: number;
-  } | null;
-  departamentoId?: string;
-  departamento?: {
-    id: string;
-    nome: string;
-    descricao?: string;
-  };
-  dataAdmissao?: string;
+  informacoesTrabalhistas?: InformacoesTrabalhistas;
   horariosFuncionario?: {
     [diaSemana: string]: {
       ativo: boolean;
@@ -42,7 +52,6 @@ export interface Funcionario {
     createdAt: string;
     updatedAt: string;
   }[];
-  cargaHorariaSemanal?: number;
   papel: "dono" | "administrador" | "funcionario";
   status: "ativo" | "inativo" | "suspenso";
   empresaId: string;

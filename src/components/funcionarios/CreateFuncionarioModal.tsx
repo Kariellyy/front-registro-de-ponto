@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDepartamentos } from "@/hooks/use-departamentos";
@@ -31,6 +32,44 @@ const formatCPF = (value: string) => {
     6,
     9
   )}-${numbers.slice(9, 11)}`;
+};
+
+// Função para converter horários do backend para o formato do frontend
+const convertBackendHorariosToFrontend = (
+  horarios?: Funcionario["horarios"]
+) => {
+  if (!horarios || horarios.length === 0) {
+    return gerarHorariosPadrao();
+  }
+
+  const horariosConvertidos: { [diaSemana: string]: HorarioDia } = {};
+
+  // Inicializar todos os dias como inativos
+  for (let i = 0; i <= 6; i++) {
+    horariosConvertidos[i.toString()] = {
+      ativo: false,
+      inicio: "",
+      fim: "",
+      temIntervalo: false,
+      intervaloInicio: "",
+      intervaloFim: "",
+    };
+  }
+
+  // Preencher com os dados do backend
+  horarios.forEach((horario) => {
+    const diaSemana = horario.diaSemana.toString();
+    horariosConvertidos[diaSemana] = {
+      ativo: horario.ativo,
+      inicio: horario.horarioInicio || "",
+      fim: horario.horarioFim || "",
+      temIntervalo: horario.temIntervalo,
+      intervaloInicio: horario.intervaloInicio || "",
+      intervaloFim: horario.intervaloFim || "",
+    };
+  });
+
+  return horariosConvertidos;
 };
 
 interface CreateFuncionarioModalProps {
@@ -90,6 +129,9 @@ export function CreateFuncionarioModal({
   const [horariosEmpresa, setHorariosEmpresa] = useState(gerarHorariosPadrao());
   const [cargosDept, setCargosDept] = useState<Cargo[]>([]);
   const [isLoadingEmpresa, setIsLoadingEmpresa] = useState(false);
+  const [isLoadingFuncionarioData, setIsLoadingFuncionarioData] =
+    useState(false);
+  const [isLoadingCargos, setIsLoadingCargos] = useState(false);
   const toast = useToast();
 
   const {
@@ -107,40 +149,81 @@ export function CreateFuncionarioModal({
 
   // Preencher formulário quando estiver editando
   useEffect(() => {
-    if (isEditing && funcionario) {
-      setValue("nome", funcionario.nome);
-      setValue("cpf", funcionario.cpf || "");
-      setValue("email", funcionario.email);
-      setValue("telefone", funcionario.telefone || "");
-      setValue("departamentoId", funcionario.departamentoId || "");
-      setValue(
-        "dataAdmissao",
-        funcionario.dataAdmissao
-          ? new Date(funcionario.dataAdmissao).toISOString().split("T")[0]
-          : ""
-      );
-      if ((funcionario as any).inicioRegistros) {
-        setValue(
-          "inicioRegistros",
-          new Date((funcionario as any).inicioRegistros)
-            .toISOString()
-            .split("T")[0]
-        );
-      }
+    const loadFuncionarioData = async () => {
+      if (isEditing && funcionario) {
+        setIsLoadingFuncionarioData(true);
 
-      // Carregar horários do funcionário ou usar padrão
-      const horariosCarregados =
-        funcionario.horariosFuncionario || gerarHorariosPadrao();
-      setHorariosFuncionario(horariosCarregados);
-      setValue("horariosFuncionario", horariosCarregados);
+        try {
+          // Dados básicos
+          setValue("nome", funcionario.nome);
+          setValue("cpf", funcionario.cpf || "");
+          setValue("email", funcionario.email);
+          setValue("telefone", funcionario.telefone || "");
 
-      const cargaCarregada = funcionario.cargaHorariaSemanal || 40;
-      setCargaHorariaSemanal(cargaCarregada);
-      setValue("cargaHorariaSemanal", cargaCarregada);
-      if (funcionario.departamentoId) {
-        cargosService.list(funcionario.departamentoId).then(setCargosDept);
+          const infoTrabalhistas = funcionario.informacoesTrabalhistas;
+          setValue("departamentoId", infoTrabalhistas?.departamentoId || "");
+          setValue("cargoId", infoTrabalhistas?.cargoId || "");
+          setValue(
+            "dataAdmissao",
+            infoTrabalhistas?.dataAdmissao
+              ? new Date(infoTrabalhistas.dataAdmissao)
+                  .toISOString()
+                  .split("T")[0]
+              : ""
+          );
+          setValue(
+            "inicioRegistros",
+            infoTrabalhistas?.inicioRegistros
+              ? new Date(infoTrabalhistas.inicioRegistros)
+                  .toISOString()
+                  .split("T")[0]
+              : ""
+          );
+
+          // Carregar horários do funcionário salvos ou usar padrão
+          let horariosCarregados;
+
+          // Priorizar horariosFuncionario se existir, senão converter do formato backend
+          if (funcionario.horariosFuncionario) {
+            horariosCarregados = funcionario.horariosFuncionario;
+          } else {
+            // Converter horários do formato backend para frontend
+            horariosCarregados = convertBackendHorariosToFrontend(
+              funcionario.horarios
+            );
+          }
+
+          setHorariosFuncionario(horariosCarregados);
+          setValue("horariosFuncionario", horariosCarregados);
+
+          const cargaCarregada = infoTrabalhistas?.cargaHorariaSemanal || 40;
+          setCargaHorariaSemanal(cargaCarregada);
+          setValue("cargaHorariaSemanal", cargaCarregada);
+
+          // Carregar cargos do departamento se existir
+          if (infoTrabalhistas?.departamentoId) {
+            setIsLoadingCargos(true);
+            try {
+              const cargos = await cargosService.list(
+                infoTrabalhistas.departamentoId
+              );
+              setCargosDept(cargos);
+            } catch (error) {
+              console.error("Erro ao carregar cargos:", error);
+              setCargosDept([]);
+            } finally {
+              setIsLoadingCargos(false);
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao carregar dados do funcionário:", error);
+        } finally {
+          setIsLoadingFuncionarioData(false);
+        }
       }
-    }
+    };
+
+    loadFuncionarioData();
   }, [isEditing, funcionario, setValue]);
 
   // Carregar horários completos da empresa quando o modal abrir
@@ -154,7 +237,7 @@ export function CreateFuncionarioModal({
             setHorariosEmpresa(empresaCompleta.horariosSemanais);
 
             // Para funcionários novos (não editando), usar horários da empresa como padrão
-            // mas sempre ativar intervalo com horário 11:00-13:00
+            // mas sempre ativar intervalo com horário 12:00-14:00
             if (!isEditing) {
               const horariosComIntervalo = {
                 ...empresaCompleta.horariosSemanais,
@@ -185,10 +268,14 @@ export function CreateFuncionarioModal({
       }
     };
 
-    if (isOpen) {
+    if (isOpen && !isEditing) {
+      // Só carregar horários da empresa se não estiver editando
       loadEmpresaHorarios();
+    } else if (isOpen && empresa?.horariosSemanais) {
+      // Se estiver editando, apenas definir os horários da empresa para referência
+      setHorariosEmpresa(empresa.horariosSemanais);
     }
-  }, [isOpen, empresa?.id]);
+  }, [isOpen, empresa?.id, isEditing]);
 
   // Removidos forms e handlers de criação de departamento
 
@@ -252,6 +339,9 @@ export function CreateFuncionarioModal({
     setHorariosFuncionario(gerarHorariosPadrao());
     setCargaHorariaSemanal(40);
     setHorariosEmpresa(gerarHorariosPadrao());
+    setCargosDept([]);
+    setIsLoadingFuncionarioData(false);
+    setIsLoadingCargos(false);
     onClose();
   };
 
@@ -296,16 +386,21 @@ export function CreateFuncionarioModal({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="nome">Nome Completo *</Label>
-                    <Input
-                      id="nome"
-                      {...register("nome", {
-                        required: "Nome é obrigatório",
-                        minLength: {
-                          value: 2,
-                          message: "Nome deve ter pelo menos 2 caracteres",
-                        },
-                      })}
-                    />
+                    {isLoadingFuncionarioData && isEditing ? (
+                      <Skeleton className="h-9 w-full" />
+                    ) : (
+                      <Input
+                        id="nome"
+                        {...register("nome", {
+                          required: "Nome é obrigatório",
+                          minLength: {
+                            value: 2,
+                            message: "Nome deve ter pelo menos 2 caracteres",
+                          },
+                        })}
+                        disabled={isLoadingFuncionarioData}
+                      />
+                    )}
                     {errors.nome && (
                       <p className="text-destructive text-sm mt-1">
                         {errors.nome.message}
@@ -315,21 +410,26 @@ export function CreateFuncionarioModal({
 
                   <div className="space-y-2">
                     <Label htmlFor="cpf">CPF *</Label>
-                    <Input
-                      id="cpf"
-                      {...register("cpf", {
-                        required: "CPF é obrigatório",
-                        pattern: {
-                          value: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
-                          message: "CPF deve estar no formato XXX.XXX.XXX-XX",
-                        },
-                      })}
-                      onChange={(e) => {
-                        const formatted = formatCPF(e.target.value);
-                        e.target.value = formatted;
-                      }}
-                      maxLength={14}
-                    />
+                    {isLoadingFuncionarioData && isEditing ? (
+                      <Skeleton className="h-9 w-full" />
+                    ) : (
+                      <Input
+                        id="cpf"
+                        {...register("cpf", {
+                          required: "CPF é obrigatório",
+                          pattern: {
+                            value: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
+                            message: "CPF deve estar no formato XXX.XXX.XXX-XX",
+                          },
+                        })}
+                        onChange={(e) => {
+                          const formatted = formatCPF(e.target.value);
+                          e.target.value = formatted;
+                        }}
+                        maxLength={14}
+                        disabled={isLoadingFuncionarioData}
+                      />
+                    )}
                     {errors.cpf && (
                       <p className="text-destructive text-sm mt-1">
                         {errors.cpf.message}
@@ -339,17 +439,22 @@ export function CreateFuncionarioModal({
 
                   <div className="space-y-2">
                     <Label htmlFor="email">Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      {...register("email", {
-                        required: "Email é obrigatório",
-                        pattern: {
-                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                          message: "Email inválido",
-                        },
-                      })}
-                    />
+                    {isLoadingFuncionarioData && isEditing ? (
+                      <Skeleton className="h-9 w-full" />
+                    ) : (
+                      <Input
+                        id="email"
+                        type="email"
+                        {...register("email", {
+                          required: "Email é obrigatório",
+                          pattern: {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: "Email inválido",
+                          },
+                        })}
+                        disabled={isLoadingFuncionarioData}
+                      />
+                    )}
                     {errors.email && (
                       <p className="text-destructive text-sm mt-1">
                         {errors.email.message}
@@ -359,16 +464,22 @@ export function CreateFuncionarioModal({
 
                   <div className="space-y-2">
                     <Label htmlFor="telefone">Telefone *</Label>
-                    <Input
-                      id="telefone"
-                      {...register("telefone", {
-                        required: "Telefone é obrigatório",
-                        minLength: {
-                          value: 10,
-                          message: "Telefone deve ter pelo menos 10 caracteres",
-                        },
-                      })}
-                    />
+                    {isLoadingFuncionarioData && isEditing ? (
+                      <Skeleton className="h-9 w-full" />
+                    ) : (
+                      <Input
+                        id="telefone"
+                        {...register("telefone", {
+                          required: "Telefone é obrigatório",
+                          minLength: {
+                            value: 10,
+                            message:
+                              "Telefone deve ter pelo menos 10 caracteres",
+                          },
+                        })}
+                        disabled={isLoadingFuncionarioData}
+                      />
+                    )}
                     {errors.telefone && (
                       <p className="text-destructive text-sm mt-1">
                         {errors.telefone.message}
@@ -387,29 +498,40 @@ export function CreateFuncionarioModal({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="departamentoId">Departamento *</Label>
-                    <select
-                      id="departamentoId"
-                      {...register("departamentoId", {
-                        required: "Departamento é obrigatório",
-                      })}
-                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                      disabled={loadingDepartamentos}
-                      onChange={async (e) => {
-                        const deptId = e.target.value;
-                        setValue("cargoId", "");
-                        setValue("salario", undefined as any);
-                        setCargosDept(
-                          deptId ? await cargosService.list(deptId) : []
-                        );
-                      }}
-                    >
-                      <option value="">Selecione um departamento</option>
-                      {departamentos.map((dept) => (
-                        <option key={dept.id} value={dept.id}>
-                          {dept.nome}
-                        </option>
-                      ))}
-                    </select>
+                    {isLoadingFuncionarioData && isEditing ? (
+                      <Skeleton className="h-9 w-full" />
+                    ) : (
+                      <select
+                        id="departamentoId"
+                        {...register("departamentoId", {
+                          required: "Departamento é obrigatório",
+                        })}
+                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={
+                          loadingDepartamentos || isLoadingFuncionarioData
+                        }
+                        onChange={async (e) => {
+                          const deptId = e.target.value;
+                          setValue("cargoId", "");
+                          setValue("salario", undefined as any);
+                          setIsLoadingCargos(true);
+                          try {
+                            setCargosDept(
+                              deptId ? await cargosService.list(deptId) : []
+                            );
+                          } finally {
+                            setIsLoadingCargos(false);
+                          }
+                        }}
+                      >
+                        <option value="">Selecione um departamento</option>
+                        {departamentos.map((dept) => (
+                          <option key={dept.id} value={dept.id}>
+                            {dept.nome}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                     {errors.departamentoId && (
                       <p className="text-destructive text-sm mt-1">
                         {errors.departamentoId.message}
@@ -419,28 +541,44 @@ export function CreateFuncionarioModal({
 
                   <div className="space-y-2">
                     <Label htmlFor="cargoId">Cargo *</Label>
-                    <select
-                      id="cargoId"
-                      {...register("cargoId", {
-                        required: "Cargo é obrigatório",
-                      })}
-                      onChange={async (e) => {
-                        const id = e.target.value;
-                        const cargo = cargosDept.find((c) => c.id === id);
-                        if (cargo) {
-                          setValue("salario", Number(cargo.baseSalarial));
+                    {isLoadingFuncionarioData && isEditing ? (
+                      <Skeleton className="h-9 w-full" />
+                    ) : isLoadingCargos ? (
+                      <div className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm items-center">
+                        <Skeleton className="h-4 w-32" />
+                      </div>
+                    ) : (
+                      <select
+                        id="cargoId"
+                        {...register("cargoId", {
+                          required: "Cargo é obrigatório",
+                        })}
+                        onChange={async (e) => {
+                          const id = e.target.value;
+                          const cargo = cargosDept.find((c) => c.id === id);
+                          if (cargo) {
+                            setValue("salario", Number(cargo.baseSalarial));
+                          }
+                        }}
+                        disabled={
+                          cargosDept.length === 0 ||
+                          isLoadingCargos ||
+                          isLoadingFuncionarioData
                         }
-                      }}
-                      disabled={cargosDept.length === 0}
-                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50"
-                    >
-                      <option value="">Selecione um cargo</option>
-                      {cargosDept.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.nome}
+                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50"
+                      >
+                        <option value="">
+                          {isLoadingCargos
+                            ? "Carregando cargos..."
+                            : "Selecione um cargo"}
                         </option>
-                      ))}
-                    </select>
+                        {cargosDept.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.nome}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                     {errors.cargoId && (
                       <p className="text-destructive text-sm mt-1">
                         {(errors as any).cargoId?.message}
@@ -450,23 +588,33 @@ export function CreateFuncionarioModal({
 
                   <div className="space-y-2">
                     <Label htmlFor="salario">Salário</Label>
-                    <Input
-                      id="salario"
-                      type="number"
-                      step="0.01"
-                      {...register("salario")}
-                    />
+                    {isLoadingFuncionarioData && isEditing ? (
+                      <Skeleton className="h-9 w-full" />
+                    ) : (
+                      <Input
+                        id="salario"
+                        type="number"
+                        step="0.01"
+                        {...register("salario")}
+                        disabled={isLoadingFuncionarioData}
+                      />
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="dataAdmissao">Data de Admissão *</Label>
-                    <Input
-                      id="dataAdmissao"
-                      type="date"
-                      {...register("dataAdmissao", {
-                        required: "Data de admissão é obrigatória",
-                      })}
-                    />
+                    {isLoadingFuncionarioData && isEditing ? (
+                      <Skeleton className="h-9 w-full" />
+                    ) : (
+                      <Input
+                        id="dataAdmissao"
+                        type="date"
+                        {...register("dataAdmissao", {
+                          required: "Data de admissão é obrigatória",
+                        })}
+                        disabled={isLoadingFuncionarioData}
+                      />
+                    )}
                     {errors.dataAdmissao && (
                       <p className="text-destructive text-sm mt-1">
                         {errors.dataAdmissao.message}
@@ -478,11 +626,16 @@ export function CreateFuncionarioModal({
                     <Label htmlFor="inicioRegistros">
                       Início dos Registros
                     </Label>
-                    <Input
-                      id="inicioRegistros"
-                      type="date"
-                      {...register("inicioRegistros")}
-                    />
+                    {isLoadingFuncionarioData && isEditing ? (
+                      <Skeleton className="h-9 w-full" />
+                    ) : (
+                      <Input
+                        id="inicioRegistros"
+                        type="date"
+                        {...register("inicioRegistros")}
+                        disabled={isLoadingFuncionarioData}
+                      />
+                    )}
                     <p className="text-xs text-muted-foreground">
                       Registros anteriores a esta data serão ignorados nos
                       cálculos.

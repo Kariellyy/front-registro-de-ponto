@@ -61,7 +61,7 @@ export function DepartamentoModal({
     departamentoNome: string
   ) => {
     const funcionariosNoDepartamento = funcionarios.filter(
-      (f) => f.departamentoId === departamentoId
+      (f) => f.informacoesTrabalhistas?.departamentoId === departamentoId
     );
 
     if (funcionariosNoDepartamento.length > 0) {
@@ -89,7 +89,9 @@ export function DepartamentoModal({
   };
 
   const getFuncionariosPorDepartamento = (departamentoId: string) => {
-    return funcionarios.filter((f) => f.departamentoId === departamentoId);
+    return funcionarios.filter(
+      (f) => f.informacoesTrabalhistas?.departamentoId === departamentoId
+    );
   };
 
   if (!isOpen) return null;
