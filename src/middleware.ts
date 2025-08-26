@@ -15,7 +15,7 @@ export default withAuth(
 
     // Proteger rota /dashboard - apenas admin e dono
     if (path.startsWith("/dashboard") && userRole === "funcionario") {
-      return NextResponse.redirect(new URL("/funcionario", req.url));
+      return NextResponse.redirect(new URL("/ponto", req.url));
     }
 
     // Proteger rota /funcionario - apenas funcionários
