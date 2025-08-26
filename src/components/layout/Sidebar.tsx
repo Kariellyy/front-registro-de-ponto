@@ -4,36 +4,36 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-    Sidebar,
-    SidebarContent,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-    Building,
-    Calendar,
-    ChevronDown,
-    Clock,
-    FileText,
-    LayoutDashboard,
-    LogOut,
-    MessageSquare,
-    Settings,
-    User,
-    Users,
-    UserX,
+  Building,
+  Calendar,
+  ChevronDown,
+  Clock,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  MessageSquare,
+  Settings,
+  User,
+  Users,
+  UserX,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -77,6 +77,11 @@ const adminItems = [
     name: "Empresa",
     href: "/dashboard/configuracoes",
     icon: Building,
+  },
+  {
+    name: "Departamentos",
+    href: "/dashboard/departamentos",
+    icon: Users,
   },
   {
     name: "Relatório Contador",
@@ -193,7 +198,9 @@ export default function AppSidebar() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col items-start min-w-0 flex-1">
-                      <span className="text-sm font-medium truncate w-full">{user.name}</span>
+                      <span className="text-sm font-medium truncate w-full">
+                        {user.name}
+                      </span>
                       <span className="text-xs text-muted-foreground truncate w-full">
                         {user.email}
                       </span>

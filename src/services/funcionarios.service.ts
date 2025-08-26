@@ -8,7 +8,8 @@ export interface CreateFuncionarioRequest {
   telefone?: string;
   photoUrl?: string;
   cpf?: string;
-  cargo?: string;
+  cargoId?: string;
+  salario?: number;
   departamentoId?: string;
   dataAdmissao?: string;
   inicioRegistros?: string;

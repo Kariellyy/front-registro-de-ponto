@@ -6,6 +6,7 @@ import { HorariosFuncionarioModal } from "@/components/funcionarios/HorariosFunc
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { LoadingTable } from "@/components/ui/loading";
 import { useToast } from "@/components/ui/toast";
@@ -40,6 +41,10 @@ export default function FuncionariosPage() {
   const [isHorariosModalOpen, setIsHorariosModalOpen] = useState(false);
   const [selectedFuncionarioHorarios, setSelectedFuncionarioHorarios] =
     useState<Funcionario | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{
+    open: boolean;
+    funcionario?: Funcionario;
+  }>({ open: false });
 
   const { funcionarios, loading, error, refresh } = useFuncionarios({
     limit: 10,
@@ -117,17 +122,7 @@ export default function FuncionariosPage() {
   };
 
   const handleDelete = async (funcionario: Funcionario) => {
-    const message = `Tem certeza que deseja excluir o funcionário "${funcionario.nome}"?\n\nEsta ação não pode ser desfeita e removerá todos os dados relacionados a este funcionário.`;
-
-    if (confirm(message)) {
-      const success = await deleteFuncionario(funcionario.id);
-      if (success) {
-        toast.success(`Funcionário ${funcionario.nome} excluído com sucesso!`);
-        refresh();
-      } else {
-        toast.error("Erro ao excluir funcionário. Tente novamente.");
-      }
-    }
+    setConfirmDelete({ open: true, funcionario });
   };
 
   const handleCreateSuccess = () => {
@@ -190,13 +185,6 @@ export default function FuncionariosPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-foreground">Funcionários</h1>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsDepartamentoModalOpen(true)}
-            >
-              Gerenciar Departamentos
-            </Button>
             <Button
               className="flex items-center gap-2"
               onClick={() => setIsCreateModalOpen(true)}
@@ -356,7 +344,7 @@ export default function FuncionariosPage() {
                       Funcionário
                     </th>
                     <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Cargo / Departamento
+                      Departamento / Cargo
                     </th>
                     <th className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                       Data Admissão
@@ -393,10 +381,10 @@ export default function FuncionariosPage() {
                       <td className="px-6 py-4">
                         <div>
                           <div className="text-sm font-medium text-foreground">
-                            {funcionario.cargo || "Não informado"}
+                            {funcionario.departamento?.nome || "Não informado"}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {funcionario.departamento?.nome || "Não informado"}
+                            {funcionario.cargo?.nome || "Não informado"}
                           </div>
                         </div>
                       </td>
@@ -529,6 +517,30 @@ export default function FuncionariosPage() {
           funcionario={selectedFuncionarioHorarios}
         />
       </div>
+      <ConfirmDialog
+        open={confirmDelete.open}
+        onOpenChange={(open) => setConfirmDelete((p) => ({ ...p, open }))}
+        title="Excluir funcionário"
+        description={
+          confirmDelete.funcionario
+            ? `Tem certeza que deseja excluir o funcionário "${confirmDelete.funcionario.nome}"? Esta ação não pode ser desfeita.`
+            : undefined
+        }
+        confirmText="Excluir"
+        isDestructive
+        onConfirm={async () => {
+          if (!confirmDelete.funcionario) return;
+          const success = await deleteFuncionario(confirmDelete.funcionario.id);
+          if (success) {
+            toast.success(
+              `Funcionário ${confirmDelete.funcionario.nome} excluído com sucesso!`
+            );
+            refresh();
+          } else {
+            toast.error("Erro ao excluir funcionário. Tente novamente.");
+          }
+        }}
+      />
     </>
   );
 }

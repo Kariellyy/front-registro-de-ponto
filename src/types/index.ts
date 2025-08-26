@@ -5,7 +5,13 @@ export interface Funcionario {
   telefone?: string;
   photoUrl?: string;
   cpf?: string;
-  cargo?: string;
+  cargoId?: string;
+  cargo?: {
+    id: string;
+    nome: string;
+    descricao?: string;
+    baseSalarial?: number;
+  } | null;
   departamentoId?: string;
   departamento?: {
     id: string;

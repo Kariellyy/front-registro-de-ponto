@@ -83,7 +83,7 @@ export function HorariosFuncionarioModal({
               Horários de Trabalho
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              {funcionario.nome} - {funcionario.cargo || "Funcionário"}
+              {funcionario.nome}
             </p>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose}>

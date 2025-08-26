@@ -9,13 +9,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useDepartamentos } from "@/hooks/use-departamentos";
 import { useFuncionarioActions } from "@/hooks/use-funcionarios";
 import { gerarHorariosPadrao } from "@/lib/horarios";
+import { Cargo, cargosService } from "@/services/cargos.service";
 import { empresasService } from "@/services/empresas.service";
 import {
   CreateFuncionarioRequest,
   UpdateFuncionarioRequest,
 } from "@/services/funcionarios.service";
 import { Funcionario } from "@/types";
-import { Plus, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { HorariosFuncionarioConfig } from "./HorariosFuncionarioConfig";
@@ -55,6 +56,8 @@ interface FormData {
   email: string;
   telefone: string;
   cargo: string;
+  cargoId?: string;
+  salario?: number;
   departamentoId: string;
   dataAdmissao: string;
   inicioRegistros?: string;
@@ -62,10 +65,7 @@ interface FormData {
   cargaHorariaSemanal: number;
 }
 
-interface DepartamentoFormData {
-  nome: string;
-  descricao?: string;
-}
+// Removido fluxo de criação de departamento neste modal
 
 export function CreateFuncionarioModal({
   isOpen,
@@ -82,12 +82,13 @@ export function CreateFuncionarioModal({
     loading: loadingDepartamentos,
   } = useDepartamentos();
   const { empresa } = useAuth();
-  const [showDepartamentoModal, setShowDepartamentoModal] = useState(false);
+  // Removido botão/modal de criar departamento aqui
   const [horariosFuncionario, setHorariosFuncionario] = useState(
     gerarHorariosPadrao()
   );
   const [cargaHorariaSemanal, setCargaHorariaSemanal] = useState(40);
   const [horariosEmpresa, setHorariosEmpresa] = useState(gerarHorariosPadrao());
+  const [cargosDept, setCargosDept] = useState<Cargo[]>([]);
   const [isLoadingEmpresa, setIsLoadingEmpresa] = useState(false);
   const toast = useToast();
 
@@ -111,7 +112,6 @@ export function CreateFuncionarioModal({
       setValue("cpf", funcionario.cpf || "");
       setValue("email", funcionario.email);
       setValue("telefone", funcionario.telefone || "");
-      setValue("cargo", funcionario.cargo || "");
       setValue("departamentoId", funcionario.departamentoId || "");
       setValue(
         "dataAdmissao",
@@ -137,6 +137,9 @@ export function CreateFuncionarioModal({
       const cargaCarregada = funcionario.cargaHorariaSemanal || 40;
       setCargaHorariaSemanal(cargaCarregada);
       setValue("cargaHorariaSemanal", cargaCarregada);
+      if (funcionario.departamentoId) {
+        cargosService.list(funcionario.departamentoId).then(setCargosDept);
+      }
     }
   }, [isEditing, funcionario, setValue]);
 
@@ -163,8 +166,8 @@ export function CreateFuncionarioModal({
                   horariosComIntervalo[dia] = {
                     ...horariosComIntervalo[dia],
                     temIntervalo: true,
-                    intervaloInicio: "11:00",
-                    intervaloFim: "13:00",
+                    intervaloInicio: "12:00",
+                    intervaloFim: "14:00",
                   };
                 }
               });
@@ -187,29 +190,7 @@ export function CreateFuncionarioModal({
     }
   }, [isOpen, empresa?.id]);
 
-  const {
-    register: registerDepartamento,
-    handleSubmit: handleSubmitDepartamento,
-    reset: resetDepartamento,
-    formState: { errors: errorsDepartamento },
-  } = useForm<DepartamentoFormData>();
-
-  const handleAddDepartamento = async (data: DepartamentoFormData) => {
-    if (data.nome.trim()) {
-      const result = await createDepartamento({
-        nome: data.nome.trim(),
-        descricao: data.descricao,
-      });
-
-      if (result) {
-        resetDepartamento();
-        setShowDepartamentoModal(false);
-        toast.success("Departamento adicionado com sucesso!");
-      } else {
-        toast.error("Erro ao adicionar departamento. Tente novamente.");
-      }
-    }
-  };
+  // Removidos forms e handlers de criação de departamento
 
   const onSubmit = async (data: FormData) => {
     if (isEditing && funcionario) {
@@ -218,7 +199,7 @@ export function CreateFuncionarioModal({
         cpf: data.cpf,
         email: data.email,
         telefone: data.telefone,
-        cargo: data.cargo,
+        cargoId: data.cargoId,
         departamentoId: data.departamentoId,
         dataAdmissao: data.dataAdmissao,
         inicioRegistros: data.inicioRegistros,
@@ -242,7 +223,7 @@ export function CreateFuncionarioModal({
         cpf: data.cpf,
         email: data.email,
         telefone: data.telefone,
-        cargo: data.cargo,
+        cargoId: data.cargoId,
         departamentoId: data.departamentoId,
         dataAdmissao: data.dataAdmissao,
         inicioRegistros: data.inicioRegistros,
@@ -286,12 +267,6 @@ export function CreateFuncionarioModal({
               <CardTitle>
                 {isEditing ? "Editar Funcionário" : "Novo Funcionário"}
               </CardTitle>
-              <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
-                <span>Carga Horária Semanal:</span>
-                <span className="font-medium text-primary">
-                  {cargaHorariaSemanal}h
-                </span>
-              </div>
             </div>
             <Button variant="ghost" size="sm" onClick={handleClose}>
               <X className="w-4 h-4" />
@@ -411,58 +386,76 @@ export function CreateFuncionarioModal({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="cargo">Cargo *</Label>
-                    <Input
-                      id="cargo"
-                      {...register("cargo", {
-                        required: "Cargo é obrigatório",
-                        minLength: {
-                          value: 2,
-                          message: "Cargo deve ter pelo menos 2 caracteres",
-                        },
-                      })}
-                    />
-                    {errors.cargo && (
-                      <p className="text-destructive text-sm mt-1">
-                        {errors.cargo.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
                     <Label htmlFor="departamentoId">Departamento *</Label>
-                    <div className="flex gap-2">
-                      <select
-                        id="departamentoId"
-                        {...register("departamentoId", {
-                          required: "Departamento é obrigatório",
-                        })}
-                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                        disabled={loadingDepartamentos}
-                      >
-                        <option value="">Selecione um departamento</option>
-                        {departamentos.map((dept) => (
-                          <option key={dept.id} value={dept.id}>
-                            {dept.nome}
-                          </option>
-                        ))}
-                      </select>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowDepartamentoModal(true)}
-                        className="h-9 w-9 p-0"
-                        disabled={loadingDepartamentos}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    <select
+                      id="departamentoId"
+                      {...register("departamentoId", {
+                        required: "Departamento é obrigatório",
+                      })}
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={loadingDepartamentos}
+                      onChange={async (e) => {
+                        const deptId = e.target.value;
+                        setValue("cargoId", "");
+                        setValue("salario", undefined as any);
+                        setCargosDept(
+                          deptId ? await cargosService.list(deptId) : []
+                        );
+                      }}
+                    >
+                      <option value="">Selecione um departamento</option>
+                      {departamentos.map((dept) => (
+                        <option key={dept.id} value={dept.id}>
+                          {dept.nome}
+                        </option>
+                      ))}
+                    </select>
                     {errors.departamentoId && (
                       <p className="text-destructive text-sm mt-1">
                         {errors.departamentoId.message}
                       </p>
                     )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="cargoId">Cargo *</Label>
+                    <select
+                      id="cargoId"
+                      {...register("cargoId", {
+                        required: "Cargo é obrigatório",
+                      })}
+                      onChange={async (e) => {
+                        const id = e.target.value;
+                        const cargo = cargosDept.find((c) => c.id === id);
+                        if (cargo) {
+                          setValue("salario", Number(cargo.baseSalarial));
+                        }
+                      }}
+                      disabled={cargosDept.length === 0}
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50"
+                    >
+                      <option value="">Selecione um cargo</option>
+                      {cargosDept.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.nome}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.cargoId && (
+                      <p className="text-destructive text-sm mt-1">
+                        {(errors as any).cargoId?.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="salario">Salário</Label>
+                    <Input
+                      id="salario"
+                      type="number"
+                      step="0.01"
+                      {...register("salario")}
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -532,76 +525,7 @@ export function CreateFuncionarioModal({
           </CardContent>
         </Card>
 
-        {/* Modal para adicionar departamento */}
-        {showDepartamentoModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-            <Card className="w-full max-w-md">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  Novo Departamento
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowDepartamentoModal(false)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form
-                  onSubmit={handleSubmitDepartamento(handleAddDepartamento)}
-                  className="space-y-4"
-                >
-                  <div className="space-y-2">
-                    <Label htmlFor="nomeDepartamento">
-                      Nome do Departamento *
-                    </Label>
-                    <Input
-                      id="nomeDepartamento"
-                      {...registerDepartamento("nome", {
-                        required: "Nome do departamento é obrigatório",
-                        minLength: {
-                          value: 2,
-                          message: "Nome deve ter pelo menos 2 caracteres",
-                        },
-                      })}
-                    />
-                    {errorsDepartamento.nome && (
-                      <p className="text-destructive text-sm mt-1">
-                        {errorsDepartamento.nome.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="descricaoDepartamento">Descrição</Label>
-                    <Input
-                      id="descricaoDepartamento"
-                      {...registerDepartamento("descricao")}
-                      placeholder="Descrição opcional do departamento"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-end gap-3 pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowDepartamentoModal(false)}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button type="submit" disabled={loadingDepartamentos}>
-                      {loadingDepartamentos
-                        ? "Adicionando..."
-                        : "Adicionar Departamento"}
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {/* Removido: modal de adicionar departamento */}
       </div>
     </>
   );

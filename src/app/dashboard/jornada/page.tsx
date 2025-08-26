@@ -54,10 +54,7 @@ export default function JornadaPage() {
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar funcionário..."
-                  className="pl-10"
-                />
+                <Input placeholder="Buscar funcionário..." className="pl-10" />
               </div>
             </div>
             <select className="px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary bg-background text-foreground">
