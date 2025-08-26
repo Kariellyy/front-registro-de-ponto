@@ -200,6 +200,14 @@ export function CreateFuncionarioModal({
           setCargaHorariaSemanal(cargaCarregada);
           setValue("cargaHorariaSemanal", cargaCarregada);
 
+          // Carregar salário das informações trabalhistas
+          if (
+            infoTrabalhistas?.salario !== undefined &&
+            infoTrabalhistas?.salario !== null
+          ) {
+            setValue("salario", infoTrabalhistas.salario);
+          }
+
           // Carregar cargos do departamento se existir
           if (infoTrabalhistas?.departamentoId) {
             setIsLoadingCargos(true);
@@ -290,8 +298,9 @@ export function CreateFuncionarioModal({
         departamentoId: data.departamentoId,
         dataAdmissao: data.dataAdmissao,
         inicioRegistros: data.inicioRegistros,
+        salario: data.salario ? Number(data.salario) : null,
         horariosFuncionario: horariosFuncionario,
-        cargaHorariaSemanal: cargaHorariaSemanal,
+        cargaHorariaSemanal: Number(cargaHorariaSemanal),
       };
 
       const result = await updateFuncionario(funcionario.id, funcionarioData);
@@ -314,9 +323,10 @@ export function CreateFuncionarioModal({
         departamentoId: data.departamentoId,
         dataAdmissao: data.dataAdmissao,
         inicioRegistros: data.inicioRegistros,
+        salario: data.salario ? Number(data.salario) : null,
         papel: "funcionario",
         horariosFuncionario: horariosFuncionario,
-        cargaHorariaSemanal: cargaHorariaSemanal,
+        cargaHorariaSemanal: Number(cargaHorariaSemanal),
       };
 
       const result = await createFuncionario(funcionarioData);
@@ -557,7 +567,17 @@ export function CreateFuncionarioModal({
                           const id = e.target.value;
                           const cargo = cargosDept.find((c) => c.id === id);
                           if (cargo) {
-                            setValue("salario", Number(cargo.baseSalarial));
+                            // Se estiver criando um novo funcionário, usar o salário base do cargo
+                            // Se estiver editando, manter o salário atual (a menos que seja undefined ou null)
+                            const currentSalary =
+                              funcionario?.informacoesTrabalhistas?.salario;
+                            if (
+                              !isEditing ||
+                              currentSalary === undefined ||
+                              currentSalary === null
+                            ) {
+                              setValue("salario", Number(cargo.baseSalarial));
+                            }
                           }
                         }}
                         disabled={

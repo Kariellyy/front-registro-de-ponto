@@ -17,6 +17,7 @@ export interface InformacoesTrabalhistas {
   dataAdmissao: string;
   inicioRegistros: string;
   cargaHorariaSemanal: number;
+  salario?: number | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -9,7 +9,7 @@ export interface CreateFuncionarioRequest {
   photoUrl?: string;
   cpf?: string;
   cargoId?: string;
-  salario?: number;
+  salario?: number | null;
   departamentoId?: string;
   dataAdmissao?: string;
   inicioRegistros?: string;
