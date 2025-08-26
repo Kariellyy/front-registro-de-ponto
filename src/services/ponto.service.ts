@@ -10,12 +10,13 @@ export interface RegistrarPontoRequest {
 export interface RegistroPonto {
   id: string;
   tipo: "entrada" | "saida" | "intervalo_inicio" | "intervalo_fim";
-  status: "aprovado" | "pendente" | "rejeitado";
+  status: "aprovado" | "pendente" | "justificado" | "rejeitado";
   dataHora: string;
   latitude?: number;
   longitude?: number;
   dentroDoRaio: boolean;
   observacoes?: string;
+  mensagem?: string;
   createdAt: string;
   usuario: {
     id: string;
@@ -62,6 +63,16 @@ export class PontoService {
   async calcularBancoHoras(mes: number, ano: number): Promise<BancoHoras> {
     return api.get<BancoHoras>(
       `${this.basePath}/banco-horas?mes=${mes}&ano=${ano}`
+    );
+  }
+
+  async atualizarRegistroComJustificativa(
+    registroId: string,
+    observacoes: string
+  ): Promise<RegistroPonto> {
+    return api.patch<RegistroPonto>(
+      `${this.basePath}/registros/${registroId}/justificativa`,
+      { observacoes }
     );
   }
 }

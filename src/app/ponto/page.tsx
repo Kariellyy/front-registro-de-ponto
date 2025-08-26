@@ -4,6 +4,17 @@ import { LoadingCard } from "@/components/funcionario/LoadingCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFuncionarioDashboard } from "@/hooks/use-funcionario-dashboard";
@@ -13,7 +24,6 @@ import {
   Calendar,
   CheckCircle,
   Clock,
-  FileText,
   LogOut,
   User,
   XCircle,
@@ -29,16 +39,31 @@ export default function FuncionarioPage() {
     ultimoRegistro,
     isLoading,
     registrarPonto,
+    atualizarRegistro,
     getProximoTipoRegistro,
   } = useFuncionarioDashboard();
   const [isRegistrando, setIsRegistrando] = useState(false);
+  const [showJustificativaModal, setShowJustificativaModal] = useState(false);
+  const [justificativa, setJustificativa] = useState("");
+  const [registroPendente, setRegistroPendente] = useState<any>(null);
 
   const handleRegistrarPonto = async () => {
     setIsRegistrando(true);
 
     try {
-      await registrarPonto();
-      toast.success("Ponto registrado com sucesso!");
+      const resultado = await registrarPonto();
+
+      // Verificar se o registro foi aprovado ou está pendente
+      if (resultado.status === "aprovado") {
+        toast.success("Ponto registrado com sucesso!");
+      } else if (resultado.status === "pendente" && !resultado.dentroDoRaio) {
+        // Apenas informar; justificativa pode ser feita pelo item na lista
+        toast.info(
+          "Ponto registrado fora do raio. Toque em Justificar no registro pendente."
+        );
+      } else if (resultado.status === "pendente") {
+        toast.info("Ponto registrado. Aguardando aprovação.");
+      }
     } catch (error: any) {
       console.error("Erro ao registrar ponto:", error);
 
@@ -55,8 +80,48 @@ export default function FuncionarioPage() {
     }
   };
 
-  const handleSolicitarJustificativa = () => {
-    toast.info("Funcionalidade de justificativa será implementada em breve!");
+  // Abrir modal de justificativa a partir da lista de registros
+  const abrirJustificativaPara = (registro: any) => {
+    setRegistroPendente(registro);
+    setJustificativa("");
+    setShowJustificativaModal(true);
+  };
+
+  const handleConfirmarJustificativa = async () => {
+    if (!registroPendente || !justificativa.trim()) return;
+    try {
+      await atualizarRegistroComJustificativa(
+        registroPendente.id,
+        justificativa
+      );
+      toast.success("Justificativa enviada. Aguardando aprovação.");
+      setShowJustificativaModal(false);
+      setJustificativa("");
+      setRegistroPendente(null);
+    } catch (err) {
+      toast.error("Não foi possível enviar a justificativa.");
+    }
+  };
+
+  const handleCancelarJustificativa = () => {
+    setShowJustificativaModal(false);
+    setJustificativa("");
+    setRegistroPendente(null);
+  };
+
+  const atualizarRegistroComJustificativa = async (
+    registroId: string,
+    justificativa: string
+  ) => {
+    try {
+      const resultado = await atualizarRegistro(registroId, {
+        observacoes: justificativa,
+      });
+      return resultado;
+    } catch (error) {
+      console.error("Erro ao atualizar registro com justificativa:", error);
+      throw error;
+    }
   };
 
   const handleAbrirExtrato = () => {
@@ -100,6 +165,8 @@ export default function FuncionarioPage() {
     switch (status) {
       case "aprovado":
         return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case "justificado":
+        return <AlertCircle className="w-4 h-4 text-blue-500" />;
       case "pendente":
         return <AlertCircle className="w-4 h-4 text-yellow-500" />;
       case "rejeitado":
@@ -107,6 +174,22 @@ export default function FuncionarioPage() {
       default:
         return <Clock className="w-4 h-4 text-gray-500" />;
     }
+  };
+
+  const formatHoursHM = (value: number): string => {
+    const sign = value < 0 ? -1 : 1;
+    const abs = Math.abs(value);
+    const hours = Math.trunc(abs);
+    const minutes = Math.round((abs - hours) * 60);
+    const signPrefix = sign < 0 ? "-" : "+";
+    return `${signPrefix}${hours}h ${minutes}min`;
+  };
+
+  const formatHoursPlain = (value: number): string => {
+    const abs = Math.abs(value);
+    const hours = Math.trunc(abs);
+    const minutes = Math.round((abs - hours) * 60);
+    return `${hours}h ${minutes}min`;
   };
 
   if (!user) {
@@ -205,102 +288,61 @@ export default function FuncionarioPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-center text-xs text-gray-500 dark:text-gray-400 mb-2">
-                  {new Date().toLocaleDateString("pt-BR", {
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </div>
-
-                {/* Estatísticas do Mês */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {bancoHoras.horasTrabalhadas}h
-                    </div>
-                    <div className="text-sm text-blue-600 dark:text-blue-400">
-                      Horas Trabalhadas
-                    </div>
-                  </div>
-                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                      {bancoHoras.horasPrevistas}h
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Horas Previstas
-                    </div>
-                  </div>
-                </div>
-
-                {/* Informações Gerais */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Carga horária semanal:
-                    </span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {bancoHoras.horasSemanais || 40}h
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Dias trabalhados:
-                    </span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {bancoHoras.diasTrabalhados} de {bancoHoras.diasUteis}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Média semanal:
-                    </span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {bancoHoras.semanasTrabalhadas > 0
-                        ? Math.round(
-                            (bancoHoras.horasTrabalhadas /
-                              bancoHoras.semanasTrabalhadas) *
-                              100
-                          ) / 100
-                        : 0}
-                      h
-                    </span>
-                  </div>
-                </div>
-
-                {/* Saldo do Mês */}
-                <div className="text-center p-3 bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg">
-                  <div className="text-sm text-green-600 dark:text-green-400 mb-1">
-                    Saldo do Mês
+                {/* Saldo Atual */}
+                <div className="text-center p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    Saldo Atual
                   </div>
                   <div
-                    className={`text-3xl font-bold ${
+                    className={`text-4xl font-bold ${
                       bancoHoras.saldoMes >= 0
                         ? "text-green-600 dark:text-green-400"
                         : "text-red-600 dark:text-red-400"
                     }`}
                   >
-                    {bancoHoras.saldoMes >= 0 ? "+" : ""}
-                    {bancoHoras.saldoMes}h
+                    {formatHoursHM(bancoHoras.saldoMes)}
                   </div>
                 </div>
 
-                {/* Saldo Total */}
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                      Saldo Total Acumulado
+                {/* Resumo */}
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                    <div className="text-blue-600 dark:text-blue-400">
+                      Horas trabalhadas no mês
                     </div>
-                    <div
-                      className={`text-2xl font-bold ${
-                        bancoHoras.saldoTotal >= 0
-                          ? "text-green-600 dark:text-green-400"
-                          : "text-red-600 dark:text-red-400"
-                      }`}
-                    >
-                      {bancoHoras.saldoTotal >= 0 ? "+" : ""}
-                      {bancoHoras.saldoTotal}h
+                    <div className="text-lg font-semibold text-blue-700 dark:text-blue-300">
+                      {formatHoursPlain(bancoHoras.horasTrabalhadas)}
                     </div>
                   </div>
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="text-gray-600 dark:text-gray-400">
+                      Horas previstas
+                    </div>
+                    <div className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                      {formatHoursPlain(bancoHoras.horasPrevistas)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progresso do mês (barra) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span>
+                      {formatHoursPlain(bancoHoras.horasTrabalhadas)}{" "}
+                      trabalhadas
+                    </span>
+                    <span>
+                      {formatHoursPlain(bancoHoras.horasPrevistas)} previstas
+                    </span>
+                  </div>
+                  <Progress
+                    value={Math.min(
+                      100,
+                      (bancoHoras.horasTrabalhadas /
+                        Math.max(1, bancoHoras.horasPrevistas)) *
+                        100
+                    )}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -337,15 +379,30 @@ export default function FuncionarioPage() {
                               {formatarData(registro.dataHora)} às{" "}
                               {formatarHora(registro.dataHora)}
                             </div>
+                            {registro.status === "pendente" && (
+                              <div className="mt-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    abrirJustificativaPara(registro)
+                                  }
+                                >
+                                  Justificar
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         </div>
                         <Badge
                           variant={
                             registro.status === "aprovado"
                               ? "default"
+                              : registro.status === "justificado"
+                              ? "outline"
                               : "secondary"
                           }
-                          className="text-xs"
+                          className="text-xs capitalize"
                         >
                           {registro.status}
                         </Badge>
@@ -364,15 +421,7 @@ export default function FuncionarioPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  variant="outline"
-                  onClick={handleSolicitarJustificativa}
-                  className="h-12 flex flex-col items-center justify-center gap-1"
-                >
-                  <FileText className="w-4 h-4" />
-                  <span className="text-xs">Justificativa</span>
-                </Button>
+              <div className="grid grid-cols-1 gap-3">
                 <Button
                   variant="outline"
                   onClick={handleAbrirExtrato}
@@ -386,6 +435,43 @@ export default function FuncionarioPage() {
           </Card>
         </div>
       </div>
+
+      {/* Modal de Justificativa */}
+      <Dialog
+        open={showJustificativaModal}
+        onOpenChange={setShowJustificativaModal}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Justificar registro fora do raio</DialogTitle>
+            <DialogDescription>
+              Informe o motivo para avaliação do gestor. O registro permanecerá
+              pendente até aprovação.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Label htmlFor="justificativa">Motivo</Label>
+            <Textarea
+              id="justificativa"
+              value={justificativa}
+              onChange={(e) => setJustificativa(e.target.value)}
+              placeholder="Ex: Reunião externa, visita a cliente, atividade em campo..."
+              rows={5}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCancelarJustificativa}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmarJustificativa}
+              disabled={!justificativa.trim()}
+            >
+              Enviar justificativa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

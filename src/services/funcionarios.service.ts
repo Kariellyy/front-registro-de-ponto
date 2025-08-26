@@ -11,6 +11,7 @@ export interface CreateFuncionarioRequest {
   cargo?: string;
   departamentoId?: string;
   dataAdmissao?: string;
+  inicioRegistros?: string;
   horariosFuncionario?: {
     [diaSemana: string]: {
       ativo: boolean;

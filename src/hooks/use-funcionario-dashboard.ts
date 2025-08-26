@@ -126,14 +126,28 @@ export function useFuncionarioDashboard() {
     }
   };
 
-  const solicitarJustificativa = async (data: string, motivo: string) => {
-    // Simular envio de justificativa
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  const atualizarRegistro = async (
+    registroId: string,
+    dados: Partial<RegistroPonto>
+  ): Promise<RegistroPonto> => {
+    try {
+      const registroAtualizado =
+        await pontoService.atualizarRegistroComJustificativa(
+          registroId,
+          dados.observacoes || ""
+        );
 
-    return {
-      success: true,
-      message: "Justificativa enviada com sucesso!",
-    };
+      setRegistros((prev) =>
+        prev.map((registro) =>
+          registro.id === registroId ? registroAtualizado : registro
+        )
+      );
+
+      return registroAtualizado;
+    } catch (error) {
+      console.error("Erro ao atualizar registro:", error);
+      throw error;
+    }
   };
 
   return {
@@ -142,7 +156,7 @@ export function useFuncionarioDashboard() {
     ultimoRegistro,
     isLoading,
     registrarPonto,
-    solicitarJustificativa,
+    atualizarRegistro,
     getProximoTipoRegistro,
   };
 }

@@ -57,6 +57,7 @@ interface FormData {
   cargo: string;
   departamentoId: string;
   dataAdmissao: string;
+  inicioRegistros?: string;
   horariosFuncionario: { [diaSemana: string]: HorarioDia };
   cargaHorariaSemanal: number;
 }
@@ -118,6 +119,14 @@ export function CreateFuncionarioModal({
           ? new Date(funcionario.dataAdmissao).toISOString().split("T")[0]
           : ""
       );
+      if ((funcionario as any).inicioRegistros) {
+        setValue(
+          "inicioRegistros",
+          new Date((funcionario as any).inicioRegistros)
+            .toISOString()
+            .split("T")[0]
+        );
+      }
 
       // Carregar horários do funcionário ou usar padrão
       const horariosCarregados =
@@ -212,6 +221,7 @@ export function CreateFuncionarioModal({
         cargo: data.cargo,
         departamentoId: data.departamentoId,
         dataAdmissao: data.dataAdmissao,
+        inicioRegistros: data.inicioRegistros,
         horariosFuncionario: horariosFuncionario,
         cargaHorariaSemanal: cargaHorariaSemanal,
       };
@@ -235,6 +245,7 @@ export function CreateFuncionarioModal({
         cargo: data.cargo,
         departamentoId: data.departamentoId,
         dataAdmissao: data.dataAdmissao,
+        inicioRegistros: data.inicioRegistros,
         papel: "funcionario",
         horariosFuncionario: horariosFuncionario,
         cargaHorariaSemanal: cargaHorariaSemanal,
@@ -468,6 +479,21 @@ export function CreateFuncionarioModal({
                         {errors.dataAdmissao.message}
                       </p>
                     )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="inicioRegistros">
+                      Início dos Registros
+                    </Label>
+                    <Input
+                      id="inicioRegistros"
+                      type="date"
+                      {...register("inicioRegistros")}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Registros anteriores a esta data serão ignorados nos
+                      cálculos.
+                    </p>
                   </div>
                 </div>
               </div>
