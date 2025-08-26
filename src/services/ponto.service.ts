@@ -34,6 +34,7 @@ export interface BancoHoras {
   diasUteis: number;
   horasSemanais: number;
   semanasTrabalhadas: number;
+  dataCalculoAte: string;
 }
 
 export class PontoService {

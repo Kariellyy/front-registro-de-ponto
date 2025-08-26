@@ -316,7 +316,7 @@ export default function FuncionarioPage() {
                   </div>
                   <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                     <div className="text-gray-600 dark:text-gray-400">
-                      Horas previstas
+                      Horas previstas até hoje
                     </div>
                     <div className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                       {formatHoursPlain(bancoHoras.horasPrevistas)}
@@ -333,6 +333,7 @@ export default function FuncionarioPage() {
                     </span>
                     <span>
                       {formatHoursPlain(bancoHoras.horasPrevistas)} previstas
+                      até hoje
                     </span>
                   </div>
                   <Progress
