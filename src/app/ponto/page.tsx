@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFuncionarioDashboard } from "@/hooks/use-funcionario-dashboard";
+import { pontoService } from "@/services/ponto.service";
 import {
   AlertCircle,
   BarChart3,
@@ -41,6 +42,7 @@ export default function FuncionarioPage() {
     registrarPonto,
     atualizarRegistro,
     getProximoTipoRegistro,
+    recarregarDados,
   } = useFuncionarioDashboard();
   const [isRegistrando, setIsRegistrando] = useState(false);
   const [showJustificativaModal, setShowJustificativaModal] = useState(false);
@@ -90,14 +92,17 @@ export default function FuncionarioPage() {
   const handleConfirmarJustificativa = async () => {
     if (!registroPendente || !justificativa.trim()) return;
     try {
-      await atualizarRegistroComJustificativa(
-        registroPendente.id,
-        justificativa
-      );
+      await pontoService.criarJustificativa(registroPendente.id, {
+        motivo: justificativa,
+        tipo: "fora_raio",
+        observacoes: justificativa,
+      });
       toast.success("Justificativa enviada. Aguardando aprovação.");
       setShowJustificativaModal(false);
       setJustificativa("");
       setRegistroPendente(null);
+      // Recarregar dados
+      await recarregarDados();
     } catch (err) {
       toast.error("Não foi possível enviar a justificativa.");
     }
@@ -450,16 +455,33 @@ export default function FuncionarioPage() {
               pendente até aprovação.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3">
-            <Label htmlFor="justificativa">Motivo</Label>
-            <Textarea
-              id="justificativa"
-              value={justificativa}
-              onChange={(e) => setJustificativa(e.target.value)}
-              placeholder="Ex: Reunião externa, visita a cliente, atividade em campo..."
-              rows={5}
-            />
-          </div>
+          {registroPendente && (
+            <div className="space-y-3">
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Registro: {getTipoLabel(registroPendente.tipo)}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Data: {formatarData(registroPendente.dataHora)} às{" "}
+                  {formatarHora(registroPendente.dataHora)}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Status:{" "}
+                  <Badge variant="secondary" className="text-xs capitalize">
+                    {registroPendente.status}
+                  </Badge>
+                </div>
+              </div>
+              <Label htmlFor="justificativa">Motivo da justificativa</Label>
+              <Textarea
+                id="justificativa"
+                value={justificativa}
+                onChange={(e) => setJustificativa(e.target.value)}
+                placeholder="Ex: Reunião externa, visita a cliente, atividade em campo..."
+                rows={5}
+              />
+            </div>
+          )}
           <DialogFooter>
             <Button variant="outline" onClick={handleCancelarJustificativa}>
               Cancelar

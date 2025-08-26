@@ -12,8 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useFormattedInput } from "@/hooks/use-formatted-input";
 import { gerarHorariosPadrao } from "@/lib/horarios";
 import {
-    empresasService,
-    horariosObjectToArray,
+  empresasService,
+  horariosObjectToArray,
 } from "@/services/empresas.service";
 import { Building, Save, Settings } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -42,7 +42,6 @@ interface EmpresaForm {
   toleranciaEntrada: number;
   toleranciaSaida: number;
   // Configurações de flexibilidade
-  permitirRegistroForaRaio: boolean;
   exigirJustificativaForaRaio: boolean;
   // Novos horários flexíveis
   horariosSemanais: { [diaSemana: string]: HorarioDia };
@@ -72,7 +71,6 @@ export default function ConfiguracoesPage() {
     toleranciaEntrada: 15,
     toleranciaSaida: 15,
     // Configurações de flexibilidade
-    permitirRegistroForaRaio: false,
     exigirJustificativaForaRaio: true,
     // Novos horários semanais
     horariosSemanais: horariosDefault,
@@ -112,8 +110,6 @@ export default function ConfiguracoesPage() {
               raioPermitido: empresaCompleta.raioPermitido || 100,
               toleranciaEntrada: empresaCompleta.toleranciaEntrada || 15,
               toleranciaSaida: empresaCompleta.toleranciaSaida || 15,
-              permitirRegistroForaRaio:
-                empresaCompleta.permitirRegistroForaRaio || false,
               exigirJustificativaForaRaio:
                 empresaCompleta.exigirJustificativaForaRaio || true,
               horariosSemanais:
@@ -147,7 +143,6 @@ export default function ConfiguracoesPage() {
               raioPermitido: 100,
               toleranciaEntrada: 15,
               toleranciaSaida: 15,
-              permitirRegistroForaRaio: false,
               exigirJustificativaForaRaio: true,
               horariosSemanais: horariosDefault,
             });
@@ -237,7 +232,6 @@ export default function ConfiguracoesPage() {
         raioPermitido: formData.raioPermitido,
         toleranciaEntrada: formData.toleranciaEntrada,
         toleranciaSaida: formData.toleranciaSaida,
-        permitirRegistroForaRaio: formData.permitirRegistroForaRaio,
         exigirJustificativaForaRaio: formData.exigirJustificativaForaRaio,
         horarios: horariosObjectToArray(formData.horariosSemanais),
       };
@@ -401,7 +395,10 @@ export default function ConfiguracoesPage() {
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,
-                            toleranciaEntrada: e.target.value === "" ? 0 : parseInt(e.target.value) || 0,
+                            toleranciaEntrada:
+                              e.target.value === ""
+                                ? 0
+                                : parseInt(e.target.value) || 0,
                           }))
                         }
                         placeholder="15"
@@ -424,7 +421,10 @@ export default function ConfiguracoesPage() {
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,
-                            toleranciaSaida: e.target.value === "" ? 0 : parseInt(e.target.value) || 0,
+                            toleranciaSaida:
+                              e.target.value === ""
+                                ? 0
+                                : parseInt(e.target.value) || 0,
                           }))
                         }
                         placeholder="15"
@@ -452,7 +452,10 @@ export default function ConfiguracoesPage() {
                         onChange={(e) =>
                           setFormData((prev) => ({
                             ...prev,
-                            raioPermitido: e.target.value === "" ? 0 : parseInt(e.target.value) || 0,
+                            raioPermitido:
+                              e.target.value === ""
+                                ? 0
+                                : parseInt(e.target.value) || 0,
                           }))
                         }
                         placeholder="100"
@@ -465,41 +468,24 @@ export default function ConfiguracoesPage() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                          <Label>Permitir registro fora do raio</Label>
+                          <Label>
+                            Exigir justificativa para registros fora do raio
+                          </Label>
                           <p className="text-xs text-muted-foreground">
-                            Funcionários podem registrar ponto fora da área
+                            Quando ativado, funcionários devem justificar
+                            registros fora da área da empresa
                           </p>
                         </div>
                         <Switch
-                          checked={formData.permitirRegistroForaRaio}
+                          checked={formData.exigirJustificativaForaRaio}
                           onCheckedChange={(checked) =>
                             setFormData((prev) => ({
                               ...prev,
-                              permitirRegistroForaRaio: checked,
+                              exigirJustificativaForaRaio: checked,
                             }))
                           }
                         />
                       </div>
-
-                      {formData.permitirRegistroForaRaio && (
-                        <div className="flex items-center justify-between pl-4 border-l-2 border-muted">
-                          <div className="space-y-0.5">
-                            <Label>Exigir justificativa</Label>
-                            <p className="text-xs text-muted-foreground">
-                              Funcionário deve justificar registro fora do raio
-                            </p>
-                          </div>
-                          <Switch
-                            checked={formData.exigirJustificativaForaRaio}
-                            onCheckedChange={(checked) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                exigirJustificativaForaRaio: checked,
-                              }))
-                            }
-                          />
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>

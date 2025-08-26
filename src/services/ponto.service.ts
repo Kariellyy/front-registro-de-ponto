@@ -17,6 +17,7 @@ export interface RegistroPonto {
   dentroDoRaio: boolean;
   observacoes?: string;
   mensagem?: string;
+  temJustificativaPendente: boolean;
   createdAt: string;
   usuario: {
     id: string;
@@ -35,6 +36,35 @@ export interface BancoHoras {
   horasSemanais: number;
   semanasTrabalhadas: number;
   dataCalculoAte: string;
+}
+
+export interface Justificativa {
+  id: string;
+  registroPontoId: string;
+  motivo: string;
+  observacoes?: string;
+  tipo:
+    | "fora_raio"
+    | "problema_tecnico"
+    | "reuniao_externa"
+    | "viagem_servico"
+    | "outros";
+  status: "pendente" | "aprovada" | "rejeitada";
+  aprovadoPor?: string;
+  dataAprovacao?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CriarJustificativaRequest {
+  motivo: string;
+  observacoes?: string;
+  tipo:
+    | "fora_raio"
+    | "problema_tecnico"
+    | "reuniao_externa"
+    | "viagem_servico"
+    | "outros";
 }
 
 export class PontoService {
@@ -75,6 +105,22 @@ export class PontoService {
       `${this.basePath}/registros/${registroId}/justificativa`,
       { observacoes }
     );
+  }
+
+  // Métodos para justificativas
+  async criarJustificativa(
+    registroId: string,
+    dados: CriarJustificativaRequest
+  ): Promise<Justificativa> {
+    return api.post<Justificativa>(`/justificativas/${registroId}`, dados);
+  }
+
+  async buscarMinhasJustificativas(): Promise<Justificativa[]> {
+    return api.get<Justificativa[]>("/justificativas/minhas");
+  }
+
+  async buscarJustificativaPorId(id: string): Promise<Justificativa> {
+    return api.get<Justificativa>(`/justificativas/${id}`);
   }
 }
 

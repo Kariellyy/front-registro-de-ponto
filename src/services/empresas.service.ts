@@ -33,7 +33,6 @@ export interface EmpresaCompleta {
   raioPermitido?: number;
   toleranciaEntrada?: number;
   toleranciaSaida?: number;
-  permitirRegistroForaRaio?: boolean;
   exigirJustificativaForaRaio?: boolean;
   horarios?: HorarioEmpresa[];
   horariosSemanais?: { [diaSemana: string]: HorarioDia }; // Backward compatibility
@@ -52,7 +51,6 @@ export interface UpdateEmpresaRequest {
   raioPermitido?: number;
   toleranciaEntrada?: number;
   toleranciaSaida?: number;
-  permitirRegistroForaRaio?: boolean;
   exigirJustificativaForaRaio?: boolean;
   horarios?: HorarioEmpresa[];
 }

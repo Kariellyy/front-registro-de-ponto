@@ -150,6 +150,27 @@ export function useFuncionarioDashboard() {
     }
   };
 
+  const recarregarDados = async () => {
+    setIsLoading(true);
+    try {
+      const [registrosData, bancoHorasData] = await Promise.all([
+        pontoService.buscarRegistros(),
+        pontoService.calcularBancoHoras(
+          new Date().getMonth() + 1,
+          new Date().getFullYear()
+        ),
+      ]);
+
+      setRegistros(registrosData);
+      setBancoHoras(bancoHorasData);
+      setUltimoRegistro(registrosData[0] || null);
+    } catch (error) {
+      console.error("Erro ao recarregar dados:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     registros,
     bancoHoras,
@@ -158,5 +179,6 @@ export function useFuncionarioDashboard() {
     registrarPonto,
     atualizarRegistro,
     getProximoTipoRegistro,
+    recarregarDados,
   };
 }
