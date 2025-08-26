@@ -166,13 +166,19 @@ export default function FuncionarioPage() {
     return getTipoLabel(proximoTipo);
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (
+    status: string,
+    temJustificativaPendente: boolean = false
+  ) => {
     switch (status) {
       case "aprovado":
         return <CheckCircle className="w-4 h-4 text-green-500" />;
       case "justificado":
         return <AlertCircle className="w-4 h-4 text-blue-500" />;
       case "pendente":
+        if (temJustificativaPendente) {
+          return <AlertCircle className="w-4 h-4 text-blue-500" />;
+        }
         return <AlertCircle className="w-4 h-4 text-yellow-500" />;
       case "rejeitado":
         return <XCircle className="w-4 h-4 text-red-500" />;
@@ -376,7 +382,10 @@ export default function FuncionarioPage() {
                         className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
                       >
                         <div className="flex items-center gap-3">
-                          {getStatusIcon(registro.status)}
+                          {getStatusIcon(
+                            registro.status,
+                            registro.temJustificativaPendente
+                          )}
                           <div>
                             <div className="font-medium text-gray-900 dark:text-white">
                               {getTipoLabel(registro.tipo)}
@@ -385,19 +394,30 @@ export default function FuncionarioPage() {
                               {formatarData(registro.dataHora)} às{" "}
                               {formatarHora(registro.dataHora)}
                             </div>
-                            {registro.status === "pendente" && (
-                              <div className="mt-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() =>
-                                    abrirJustificativaPara(registro)
-                                  }
-                                >
-                                  Justificar
-                                </Button>
-                              </div>
-                            )}
+                            {registro.status === "pendente" &&
+                              !registro.temJustificativaPendente && (
+                                <div className="mt-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      abrirJustificativaPara(registro)
+                                    }
+                                  >
+                                    Justificar
+                                  </Button>
+                                </div>
+                              )}
+                            {registro.status === "pendente" &&
+                              registro.temJustificativaPendente && (
+                                <div className="mt-2">
+                                  <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+                                    <span>
+                                      Justificativa enviada
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
                           </div>
                         </div>
                         <Badge
@@ -406,11 +426,17 @@ export default function FuncionarioPage() {
                               ? "default"
                               : registro.status === "justificado"
                               ? "outline"
+                              : registro.status === "pendente" &&
+                                registro.temJustificativaPendente
+                              ? "outline"
                               : "secondary"
                           }
                           className="text-xs capitalize"
                         >
-                          {registro.status}
+                          {registro.status === "pendente" &&
+                          registro.temJustificativaPendente
+                            ? "justificada"
+                            : registro.status}
                         </Badge>
                       </div>
                     ))}
