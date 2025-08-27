@@ -92,11 +92,6 @@ export function useFaltas() {
     );
   };
 
-  const detectarFaltasAutomaticas = async (data: string): Promise<void> => {
-    await faltasService.detectarFaltasAutomaticas(data);
-    await carregarFaltasPendentes();
-  };
-
   const detectarFaltasRetroativas = async (
     dataInicio: string,
     dataFim: string
@@ -121,7 +116,6 @@ export function useFaltas() {
     aprovarFalta,
     rejeitarFalta,
     deletarFalta,
-    detectarFaltasAutomaticas,
     detectarFaltasRetroativas,
   };
 }

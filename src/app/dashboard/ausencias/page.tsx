@@ -71,7 +71,6 @@ export default function AusenciasPage() {
     aprovarFalta,
     rejeitarFalta,
     deletarFalta,
-    detectarFaltasAutomaticas,
     detectarFaltasRetroativas,
   } = useFaltas();
 
@@ -134,8 +133,9 @@ export default function AusenciasPage() {
     }
   };
 
-  const formatarData = (data: string | Date) => {
-    return new Date(data).toLocaleDateString("pt-BR");
+  const formatarData = (data: string) => {
+    const [ano, mes, dia] = data.split("-");
+    return `${dia}/${mes}/${ano}`;
   };
 
   const handleRegistrarFalta = async () => {
@@ -219,32 +219,18 @@ export default function AusenciasPage() {
     }
   };
 
-  const handleDetectarFaltasAutomaticas = async () => {
+  const handleDetectarFaltas = async () => {
     try {
-      await detectarFaltasAutomaticas(new Date().toISOString().split("T")[0]);
-      toast.success("Detecção automática de faltas executada!");
-    } catch (error: any) {
-      toast.error(
-        error.response?.data?.message ||
-          "Erro ao detectar faltas automaticamente"
-      );
-    }
-  };
-
-  const handleDetectarFaltasRetroativas = async () => {
-    try {
-      // Detectar faltas dos últimos 7 dias
+      // Detectar faltas dos últimos 7 dias incluindo a data atual
       const dataFim = new Date().toISOString().split("T")[0];
       const dataInicio = new Date();
       dataInicio.setDate(dataInicio.getDate() - 7);
       const dataInicioStr = dataInicio.toISOString().split("T")[0];
 
       await detectarFaltasRetroativas(dataInicioStr, dataFim);
-      toast.success("Detecção retroativa de faltas executada!");
+      toast.success("Detecção de faltas executada com sucesso!");
     } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || "Erro ao detectar faltas retroativas"
-      );
+      toast.error(error.response?.data?.message || "Erro ao detectar faltas");
     }
   };
 
@@ -286,7 +272,7 @@ export default function AusenciasPage() {
                 Registrar Falta
               </Button>
               <Button
-                onClick={handleDetectarFaltasAutomaticas}
+                onClick={handleDetectarFaltas}
                 variant="outline"
                 disabled={isLoadingPendentes}
               >
@@ -296,14 +282,6 @@ export default function AusenciasPage() {
                   }`}
                 />
                 Detectar Faltas
-              </Button>
-              <Button
-                onClick={handleDetectarFaltasRetroativas}
-                variant="outline"
-                disabled={isLoadingPendentes}
-              >
-                <Calendar className="w-4 h-4 mr-2" />
-                Detectar Retroativas
               </Button>
             </div>
           </div>
@@ -675,33 +653,42 @@ export default function AusenciasPage() {
 
       {/* Modal Aprovar Falta */}
       <Dialog open={showAprovarFalta} onOpenChange={setShowAprovarFalta}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Aprovar Falta</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-xl font-bold text-gray-900">
+              Aprovar Falta
+            </DialogTitle>
+            <DialogDescription className="text-base text-gray-600">
               Aprovar a falta de {faltaSelecionada?.usuario?.nome} em{" "}
               {faltaSelecionada && formatarData(faltaSelecionada.data)}
             </DialogDescription>
           </DialogHeader>
-          <div>
-            <Label htmlFor="observacoesAprovacao">Observações (opcional)</Label>
+          <div className="space-y-3">
+            <Label
+              htmlFor="observacoesAprovacao"
+              className="text-sm font-semibold text-gray-900"
+            >
+              Observações (opcional)
+            </Label>
             <Textarea
               id="observacoesAprovacao"
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
               placeholder="Observações sobre a aprovação..."
+              className="min-h-[100px] resize-none border-gray-300 focus:border-green-500 focus:ring-green-500"
             />
           </div>
-          <DialogFooter>
+          <DialogFooter className="mt-6">
             <Button
               variant="outline"
               onClick={() => setShowAprovarFalta(false)}
+              className="border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleAprovarFalta}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-green-600 hover:bg-green-700 text-white font-medium"
             >
               Aprovar
             </Button>
@@ -711,28 +698,37 @@ export default function AusenciasPage() {
 
       {/* Modal Rejeitar Falta */}
       <Dialog open={showRejeitarFalta} onOpenChange={setShowRejeitarFalta}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rejeitar Falta</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-xl font-bold text-gray-900">
+              Rejeitar Falta
+            </DialogTitle>
+            <DialogDescription className="text-base text-gray-600">
               Rejeitar a falta de {faltaSelecionada?.usuario?.nome} em{" "}
               {faltaSelecionada && formatarData(faltaSelecionada.data)}
             </DialogDescription>
           </DialogHeader>
-          <div>
-            <Label htmlFor="motivoRejeicao">Motivo da Rejeição *</Label>
+          <div className="space-y-3">
+            <Label
+              htmlFor="motivoRejeicao"
+              className="text-sm font-semibold text-gray-900"
+            >
+              Motivo da Rejeição *
+            </Label>
             <Textarea
               id="motivoRejeicao"
               value={motivoRejeicao}
               onChange={(e) => setMotivoRejeicao(e.target.value)}
               placeholder="Descreva o motivo da rejeição..."
               required
+              className="min-h-[100px] resize-none border-gray-300 focus:border-red-500 focus:ring-red-500"
             />
           </div>
-          <DialogFooter>
+          <DialogFooter className="mt-6">
             <Button
               variant="outline"
               onClick={() => setShowRejeitarFalta(false)}
+              className="border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               Cancelar
             </Button>
@@ -740,6 +736,7 @@ export default function AusenciasPage() {
               onClick={handleRejeitarFalta}
               variant="destructive"
               disabled={!motivoRejeicao.trim()}
+              className="bg-red-600 hover:bg-red-700 text-white font-medium"
             >
               Rejeitar
             </Button>

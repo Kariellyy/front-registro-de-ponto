@@ -30,6 +30,7 @@ export interface BancoHoras {
   saldoMes: number;
   horasTrabalhadas: number;
   horasPrevistas: number;
+  horasJustificadas: number;
   saldoTotal: number;
   diasTrabalhados: number;
   diasUteis: number;

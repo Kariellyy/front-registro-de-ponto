@@ -3,7 +3,7 @@ import { api } from "@/lib/api";
 export interface Falta {
   id: string;
   usuarioId: string;
-  data: Date;
+  data: string;
   tipo:
     | "falta_justificada"
     | "falta_injustificada"
@@ -18,9 +18,9 @@ export interface Falta {
   minutosAtraso?: number;
   minutosSaidaAntecipada?: number;
   aprovadoPor?: string;
-  dataAprovacao?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  dataAprovacao?: string;
+  createdAt: string;
+  updatedAt: string;
   usuario?: {
     id: string;
     nome: string;
@@ -58,39 +58,52 @@ class FaltasService {
     if (dataInicio) params.append("dataInicio", dataInicio);
     if (dataFim) params.append("dataFim", dataFim);
 
-    const response = await api.get(`/faltas?${params.toString()}`);
-    return response.data;
+    const response = await api.get<Falta[]>(
+      `/faltas/empresa?${params.toString()}`
+    );
+    return response || [];
+  }
+
+  async buscarFaltasUsuario(
+    dataInicio?: string,
+    dataFim?: string
+  ): Promise<Falta[]> {
+    const params = new URLSearchParams();
+    if (dataInicio) params.append("dataInicio", dataInicio);
+    if (dataFim) params.append("dataFim", dataFim);
+
+    const response = await api.get<Falta[]>(`/faltas?${params.toString()}`);
+    return response || [];
   }
 
   async buscarFaltasPendentes(): Promise<Falta[]> {
-    const response = await api.get("/faltas/pendentes");
-    return response.data;
+    const response = await api.get<Falta[]>("/faltas/pendentes");
+    return response || [];
   }
 
   async registrarFalta(data: RegistrarFaltaData): Promise<Falta> {
-    const response = await api.post("/faltas", data);
-    return response.data;
+    const response = await api.post<Falta>("/faltas", data);
+    return response;
   }
 
   async aprovarFalta(faltaId: string, data: AprovarFaltaData): Promise<Falta> {
-    const response = await api.put(`/faltas/${faltaId}/aprovar`, data);
-    return response.data;
+    const response = await api.patch<Falta>(`/faltas/${faltaId}/aprovar`, data);
+    return response;
   }
 
   async rejeitarFalta(
     faltaId: string,
     data: RejeitarFaltaData
   ): Promise<Falta> {
-    const response = await api.put(`/faltas/${faltaId}/rejeitar`, data);
-    return response.data;
+    const response = await api.patch<Falta>(
+      `/faltas/${faltaId}/rejeitar`,
+      data
+    );
+    return response;
   }
 
   async deletarFalta(faltaId: string): Promise<void> {
     await api.delete(`/faltas/${faltaId}`);
-  }
-
-  async detectarFaltasAutomaticas(data: string): Promise<void> {
-    await api.post("/faltas/detectar-automaticas", { data });
   }
 
   async detectarFaltasRetroativas(

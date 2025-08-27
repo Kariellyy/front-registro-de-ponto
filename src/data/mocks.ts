@@ -1,11 +1,11 @@
 import {
-    Ausencia,
-    BancoHoras,
-    DashboardMetrics,
-    Ferias,
-    Funcionario,
-    JustificativaPonto,
-    RegistroPonto
+  Ausencia,
+  BancoHoras,
+  DashboardMetrics,
+  Ferias,
+  Funcionario,
+  JustificativaPonto,
+  RegistroPonto,
 } from "@/types";
 
 // Mock de Funcionários
@@ -23,10 +23,8 @@ export const funcionariosMock: Funcionario[] = [
     horarioTrabalho: {
       entrada: "08:00",
       saida: "17:00",
-      intervalos: [
-        { inicio: "12:00", fim: "13:00" }
-      ]
-    }
+      intervalos: [{ inicio: "12:00", fim: "13:00" }],
+    },
   },
   {
     id: "2",
@@ -41,10 +39,8 @@ export const funcionariosMock: Funcionario[] = [
     horarioTrabalho: {
       entrada: "09:00",
       saida: "18:00",
-      intervalos: [
-        { inicio: "12:30", fim: "13:30" }
-      ]
-    }
+      intervalos: [{ inicio: "12:30", fim: "13:30" }],
+    },
   },
   {
     id: "3",
@@ -59,10 +55,8 @@ export const funcionariosMock: Funcionario[] = [
     horarioTrabalho: {
       entrada: "08:30",
       saida: "17:30",
-      intervalos: [
-        { inicio: "12:00", fim: "13:00" }
-      ]
-    }
+      intervalos: [{ inicio: "12:00", fim: "13:00" }],
+    },
   },
   {
     id: "4",
@@ -77,10 +71,8 @@ export const funcionariosMock: Funcionario[] = [
     horarioTrabalho: {
       entrada: "08:00",
       saida: "17:00",
-      intervalos: [
-        { inicio: "12:00", fim: "13:00" }
-      ]
-    }
+      intervalos: [{ inicio: "12:00", fim: "13:00" }],
+    },
   },
   {
     id: "5",
@@ -95,11 +87,9 @@ export const funcionariosMock: Funcionario[] = [
     horarioTrabalho: {
       entrada: "08:00",
       saida: "17:00",
-      intervalos: [
-        { inicio: "12:00", fim: "13:00" }
-      ]
-    }
-  }
+      intervalos: [{ inicio: "12:00", fim: "13:00" }],
+    },
+  },
 ];
 
 // Mock de Registros de Ponto
@@ -110,12 +100,12 @@ export const registrosPontoMock: RegistroPonto[] = [
     dataHora: new Date("2024-01-22T08:00:00"),
     tipo: "entrada",
     localizacao: {
-      latitude: -23.550520,
+      latitude: -23.55052,
       longitude: -46.633308,
-      endereco: "Rua Augusta, 123 - São Paulo, SP"
+      endereco: "Rua Augusta, 123 - São Paulo, SP",
     },
     qrCodeId: "QR001",
-    status: "aprovado"
+    status: "aprovado",
   },
   {
     id: "2",
@@ -123,12 +113,12 @@ export const registrosPontoMock: RegistroPonto[] = [
     dataHora: new Date("2024-01-22T12:00:00"),
     tipo: "intervalo_inicio",
     localizacao: {
-      latitude: -23.550520,
+      latitude: -23.55052,
       longitude: -46.633308,
-      endereco: "Rua Augusta, 123 - São Paulo, SP"
+      endereco: "Rua Augusta, 123 - São Paulo, SP",
     },
     qrCodeId: "QR001",
-    status: "aprovado"
+    status: "aprovado",
   },
   {
     id: "3",
@@ -136,12 +126,12 @@ export const registrosPontoMock: RegistroPonto[] = [
     dataHora: new Date("2024-01-22T13:00:00"),
     tipo: "intervalo_fim",
     localizacao: {
-      latitude: -23.550520,
+      latitude: -23.55052,
       longitude: -46.633308,
-      endereco: "Rua Augusta, 123 - São Paulo, SP"
+      endereco: "Rua Augusta, 123 - São Paulo, SP",
     },
     qrCodeId: "QR001",
-    status: "aprovado"
+    status: "aprovado",
   },
   {
     id: "4",
@@ -149,12 +139,12 @@ export const registrosPontoMock: RegistroPonto[] = [
     dataHora: new Date("2024-01-22T17:00:00"),
     tipo: "saida",
     localizacao: {
-      latitude: -23.550520,
+      latitude: -23.55052,
       longitude: -46.633308,
-      endereco: "Rua Augusta, 123 - São Paulo, SP"
+      endereco: "Rua Augusta, 123 - São Paulo, SP",
     },
     qrCodeId: "QR001",
-    status: "aprovado"
+    status: "aprovado",
   },
   {
     id: "5",
@@ -162,14 +152,14 @@ export const registrosPontoMock: RegistroPonto[] = [
     dataHora: new Date("2024-01-22T09:15:00"),
     tipo: "entrada",
     localizacao: {
-      latitude: -23.550520,
+      latitude: -23.55052,
       longitude: -46.633308,
-      endereco: "Rua Augusta, 123 - São Paulo, SP"
+      endereco: "Rua Augusta, 123 - São Paulo, SP",
     },
     qrCodeId: "QR001",
     status: "pendente",
-    justificativa: "Atraso por trânsito"
-  }
+    justificativa: "Atraso por trânsito",
+  },
 ];
 
 // Mock de Ausências
@@ -182,7 +172,7 @@ export const ausenciasMock: Ausencia[] = [
     dataFim: new Date("2024-01-22"),
     motivo: "Consulta médica de emergência",
     status: "pendente",
-    observacoes: "Aguardando apresentação do atestado médico"
+    observacoes: "Aguardando apresentação do atestado médico",
   },
   {
     id: "2",
@@ -192,7 +182,7 @@ export const ausenciasMock: Ausencia[] = [
     dataFim: new Date("2024-01-25"),
     motivo: "Assuntos pessoais",
     status: "aprovada",
-    documentoAnexo: "licenca_carlos_25012024.pdf"
+    documentoAnexo: "licenca_carlos_25012024.pdf",
   },
   {
     id: "3",
@@ -202,8 +192,8 @@ export const ausenciasMock: Ausencia[] = [
     dataFim: new Date("2024-01-18"),
     motivo: "Não informado",
     status: "rejeitada",
-    observacoes: "Falta injustificada"
-  }
+    observacoes: "Falta injustificada",
+  },
 ];
 
 // Mock de Férias
@@ -213,7 +203,7 @@ export const feriasMock: Ferias[] = [
     funcionarioId: "1",
     periodoAquisitivo: {
       inicio: new Date("2023-01-15"),
-      fim: new Date("2024-01-14")
+      fim: new Date("2024-01-14"),
     },
     diasDireito: 30,
     diasUsados: 15,
@@ -223,23 +213,23 @@ export const feriasMock: Ferias[] = [
         dataInicio: new Date("2023-07-01"),
         dataFim: new Date("2023-07-15"),
         dias: 15,
-        status: "concluido"
+        status: "concluido",
       },
       {
         id: "2",
         dataInicio: new Date("2024-03-01"),
         dataFim: new Date("2024-03-15"),
         dias: 15,
-        status: "agendado"
-      }
-    ]
+        status: "agendado",
+      },
+    ],
   },
   {
     id: "2",
     funcionarioId: "2",
     periodoAquisitivo: {
       inicio: new Date("2023-03-20"),
-      fim: new Date("2024-03-19")
+      fim: new Date("2024-03-19"),
     },
     diasDireito: 30,
     diasUsados: 0,
@@ -249,10 +239,10 @@ export const feriasMock: Ferias[] = [
         dataInicio: new Date("2024-02-10"),
         dataFim: new Date("2024-02-24"),
         dias: 15,
-        status: "agendado"
-      }
-    ]
-  }
+        status: "agendado",
+      },
+    ],
+  },
 ];
 
 // Mock de Justificativas de Ponto
@@ -264,7 +254,7 @@ export const justificativasPontoMock: JustificativaPonto[] = [
     motivo: "Atraso por trânsito",
     descricao: "Atraso de 15 minutos devido a acidente na via principal",
     dataJustificativa: new Date("2024-01-22T09:30:00"),
-    status: "pendente"
+    status: "pendente",
   },
   {
     id: "2",
@@ -276,7 +266,7 @@ export const justificativasPontoMock: JustificativaPonto[] = [
     status: "aprovada",
     analisadoPor: "3",
     dataAnalise: new Date("2024-01-21T18:00:00"),
-    observacoesAnalise: "Justificativa aceita. Anexar comprovante da consulta."
+    observacoesAnalise: "Justificativa aceita. Anexar comprovante da consulta.",
   },
   {
     id: "3",
@@ -288,8 +278,8 @@ export const justificativasPontoMock: JustificativaPonto[] = [
     status: "rejeitada",
     analisadoPor: "3",
     dataAnalise: new Date("2024-01-20T17:00:00"),
-    observacoesAnalise: "Justificativa não aceita. Falta de comprovação."
-  }
+    observacoesAnalise: "Justificativa não aceita. Falta de comprovação.",
+  },
 ];
 
 // Mock de Banco de Horas
@@ -303,26 +293,29 @@ export const bancoHorasMock: BancoHoras[] = [
     horasDebito: 0,
     saldoAnterior: 25,
     saldoAtual: 37,
+    horasTrabalhadas: 160,
+    horasPrevistas: 160,
+    horasJustificadas: 8,
     detalhes: [
       {
         data: new Date("2024-01-15"),
         horas: 2,
         tipo: "extra",
-        descricao: "Projeto urgente - frontend"
+        descricao: "Projeto urgente - frontend",
       },
       {
         data: new Date("2024-01-20"),
         horas: 4,
         tipo: "extra",
-        descricao: "Deploy de emergência"
+        descricao: "Deploy de emergência",
       },
       {
         data: new Date("2024-01-22"),
         horas: 6,
         tipo: "extra",
-        descricao: "Reunião com cliente"
-      }
-    ]
+        descricao: "Reunião com cliente",
+      },
+    ],
   },
   {
     id: "2",
@@ -333,26 +326,29 @@ export const bancoHorasMock: BancoHoras[] = [
     horasDebito: 2,
     saldoAnterior: 18,
     saldoAtual: 24,
+    horasTrabalhadas: 152,
+    horasPrevistas: 160,
+    horasJustificadas: 0,
     detalhes: [
       {
         data: new Date("2024-01-10"),
         horas: 3,
         tipo: "extra",
-        descricao: "Design de nova feature"
+        descricao: "Design de nova feature",
       },
       {
         data: new Date("2024-01-18"),
         horas: 2,
         tipo: "debito",
-        descricao: "Saída antecipada"
+        descricao: "Saída antecipada",
       },
       {
         data: new Date("2024-01-25"),
         horas: 5,
         tipo: "extra",
-        descricao: "Revisão de protótipos"
-      }
-    ]
+        descricao: "Revisão de protótipos",
+      },
+    ],
   },
   {
     id: "3",
@@ -363,21 +359,24 @@ export const bancoHorasMock: BancoHoras[] = [
     horasDebito: 4,
     saldoAnterior: 2,
     saldoAtual: -2,
+    horasTrabalhadas: 0,
+    horasPrevistas: 160,
+    horasJustificadas: 160,
     detalhes: [
       {
         data: new Date("2024-01-12"),
         horas: 2,
         tipo: "debito",
-        descricao: "Atraso manhã"
+        descricao: "Atraso manhã",
       },
       {
         data: new Date("2024-01-18"),
         horas: 2,
         tipo: "debito",
-        descricao: "Falta injustificada"
-      }
-    ]
-  }
+        descricao: "Falta injustificada",
+      },
+    ],
+  },
 ];
 
 // Mock de Métricas do Dashboard
@@ -388,7 +387,7 @@ export const dashboardMetricsMock: DashboardMetrics = {
   horasExtrasMes: 127,
   pontosJustificar: 8,
   feriasAgendadas: 12,
-  ausenciasPendentes: 5
+  ausenciasPendentes: 5,
 };
 
 // Mock de Departamentos
@@ -398,7 +397,7 @@ export const departamentosMock = [
   { id: "3", nome: "Gestão", funcionarios: 5 },
   { id: "4", nome: "Marketing", funcionarios: 7 },
   { id: "5", nome: "Vendas", funcionarios: 10 },
-  { id: "6", nome: "Financeiro", funcionarios: 5 }
+  { id: "6", nome: "Financeiro", funcionarios: 5 },
 ];
 
 // Mock de Cargos
@@ -410,7 +409,7 @@ export const cargosMock = [
   { id: "5", nome: "Gerente de Projeto", departamento: "Gestão" },
   { id: "6", nome: "Analista de Marketing", departamento: "Marketing" },
   { id: "7", nome: "Vendedor", departamento: "Vendas" },
-  { id: "8", nome: "Contador", departamento: "Financeiro" }
+  { id: "8", nome: "Contador", departamento: "Financeiro" },
 ];
 
 // Mock de QR Codes
@@ -421,9 +420,9 @@ export const qrCodesMock = [
     localizacao: "Recepção - Térreo",
     ativo: true,
     coordenadas: {
-      latitude: -23.550520,
-      longitude: -46.633308
-    }
+      latitude: -23.55052,
+      longitude: -46.633308,
+    },
   },
   {
     id: "QR002",
@@ -432,8 +431,8 @@ export const qrCodesMock = [
     ativo: true,
     coordenadas: {
       latitude: -23.550525,
-      longitude: -46.633315
-    }
+      longitude: -46.633315,
+    },
   },
   {
     id: "QR003",
@@ -441,10 +440,10 @@ export const qrCodesMock = [
     localizacao: "3º Andar - Copa",
     ativo: false,
     coordenadas: {
-      latitude: -23.550530,
-      longitude: -46.633320
-    }
-  }
+      latitude: -23.55053,
+      longitude: -46.63332,
+    },
+  },
 ];
 
 // Mock de Feriados
@@ -453,66 +452,66 @@ export const feriadosMock = [
     id: "1",
     nome: "Confraternização Universal",
     data: new Date("2024-01-01"),
-    tipo: "nacional"
+    tipo: "nacional",
   },
   {
     id: "2",
     nome: "Carnaval",
     data: new Date("2024-02-12"),
-    tipo: "nacional"
+    tipo: "nacional",
   },
   {
     id: "3",
     nome: "Carnaval",
     data: new Date("2024-02-13"),
-    tipo: "nacional"
+    tipo: "nacional",
   },
   {
     id: "4",
     nome: "Sexta-feira Santa",
     data: new Date("2024-03-29"),
-    tipo: "nacional"
+    tipo: "nacional",
   },
   {
     id: "5",
     nome: "Tiradentes",
     data: new Date("2024-04-21"),
-    tipo: "nacional"
+    tipo: "nacional",
   },
   {
     id: "6",
     nome: "Dia do Trabalhador",
     data: new Date("2024-05-01"),
-    tipo: "nacional"
+    tipo: "nacional",
   },
   {
     id: "7",
     nome: "Independência do Brasil",
     data: new Date("2024-09-07"),
-    tipo: "nacional"
+    tipo: "nacional",
   },
   {
     id: "8",
     nome: "Nossa Senhora Aparecida",
     data: new Date("2024-10-12"),
-    tipo: "nacional"
+    tipo: "nacional",
   },
   {
     id: "9",
     nome: "Finados",
     data: new Date("2024-11-02"),
-    tipo: "nacional"
+    tipo: "nacional",
   },
   {
     id: "10",
     nome: "Proclamação da República",
     data: new Date("2024-11-15"),
-    tipo: "nacional"
+    tipo: "nacional",
   },
   {
     id: "11",
     nome: "Natal",
     data: new Date("2024-12-25"),
-    tipo: "nacional"
-  }
-]; 
+    tipo: "nacional",
+  },
+];

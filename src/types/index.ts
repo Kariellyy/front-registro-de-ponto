@@ -128,6 +128,9 @@ export interface BancoHoras {
   horasDebito: number;
   saldoAnterior: number;
   saldoAtual: number;
+  horasTrabalhadas: number;
+  horasPrevistas: number;
+  horasJustificadas: number;
   detalhes: {
     data: Date;
     horas: number;

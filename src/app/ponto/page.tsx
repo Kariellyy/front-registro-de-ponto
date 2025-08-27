@@ -331,18 +331,26 @@ export default function FuncionarioPage() {
                 </div>
 
                 {/* Resumo */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-3 gap-4 text-sm">
                   <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
                     <div className="text-blue-600 dark:text-blue-400">
-                      Horas trabalhadas no mês
+                      Horas trabalhadas
                     </div>
                     <div className="text-lg font-semibold text-blue-700 dark:text-blue-300">
                       {formatHoursPlain(bancoHoras.horasTrabalhadas)}
                     </div>
                   </div>
+                  <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+                    <div className="text-green-600 dark:text-green-400">
+                      Horas justificadas
+                    </div>
+                    <div className="text-lg font-semibold text-green-700 dark:text-green-300">
+                      {formatHoursPlain(bancoHoras.horasJustificadas)}
+                    </div>
+                  </div>
                   <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                     <div className="text-gray-600 dark:text-gray-400">
-                      Horas previstas até hoje
+                      Horas previstas
                     </div>
                     <div className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                       {formatHoursPlain(bancoHoras.horasPrevistas)}
@@ -354,18 +362,21 @@ export default function FuncionarioPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span>
-                      {formatHoursPlain(bancoHoras.horasTrabalhadas)}{" "}
-                      trabalhadas
+                      {formatHoursPlain(
+                        bancoHoras.horasTrabalhadas +
+                          bancoHoras.horasJustificadas
+                      )}{" "}
+                      (trabalhadas + justificadas)
                     </span>
                     <span>
                       {formatHoursPlain(bancoHoras.horasPrevistas)} previstas
-                      até hoje
                     </span>
                   </div>
                   <Progress
                     value={Math.min(
                       100,
-                      (bancoHoras.horasTrabalhadas /
+                      ((bancoHoras.horasTrabalhadas +
+                        bancoHoras.horasJustificadas) /
                         Math.max(1, bancoHoras.horasPrevistas)) *
                         100
                     )}
