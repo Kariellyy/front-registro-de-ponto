@@ -221,11 +221,12 @@ export default function AusenciasPage() {
 
   const handleDetectarFaltas = async () => {
     try {
-      // Detectar faltas dos últimos 7 dias incluindo a data atual
-      const dataFim = new Date().toISOString().split("T")[0];
+      // Detectar faltas dos últimos 7 dias
+      const hoje = new Date();
       const dataInicio = new Date();
-      dataInicio.setDate(dataInicio.getDate() - 7);
+      dataInicio.setDate(hoje.getDate() - 7);
       const dataInicioStr = dataInicio.toISOString().split("T")[0];
+      const dataFim = hoje.toISOString().split("T")[0];
 
       await detectarFaltasRetroativas(dataInicioStr, dataFim);
       toast.success("Detecção de faltas executada com sucesso!");
