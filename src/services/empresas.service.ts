@@ -124,7 +124,6 @@ class EmpresasService {
         data = await api.get<EmpresaCompleta>(`/empresas/${empresaId}`);
       } catch (error) {
         // Se falhar, usar o endpoint /me como fallback
-        console.log("Tentando endpoint alternativo /empresas/me");
         data = await api.get<EmpresaCompleta>("/empresas/me");
       }
 
@@ -148,8 +147,6 @@ class EmpresasService {
     try {
       const data = await api.get<EmpresaCompleta>("/empresas/me");
 
-      console.log("Resposta da API /empresas/me:", data);
-
       if (!data) {
         console.error("API retornou dados vazios:", data);
         throw new Error("Dados da empresa não encontrados");
@@ -161,12 +158,7 @@ class EmpresasService {
         Array.isArray(data.horarios) &&
         data.horarios.length > 0
       ) {
-        console.log("Horários do backend:", data.horarios);
         data.horariosSemanais = horariosArrayToObject(data.horarios);
-        console.log(
-          "Horários convertidos para frontend:",
-          data.horariosSemanais
-        );
       } else {
         console.warn(
           "Nenhum horário encontrado na resposta da API",

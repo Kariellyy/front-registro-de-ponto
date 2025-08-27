@@ -161,6 +161,7 @@ export default function FuncionarioPage() {
   };
 
   const getProximoTipoLabel = () => {
+    if (isLoading) return "Carregando...";
     const proximoTipo = getProximoTipoRegistro();
     if (!proximoTipo) return "Registros Completos";
     return getTipoLabel(proximoTipo);
@@ -252,38 +253,52 @@ export default function FuncionarioPage() {
                   {formatarData(new Date().toISOString())} -{" "}
                   {formatarHora(new Date().toISOString())}
                 </p>
-                <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                  Próximo: {getProximoTipoLabel()}
-                </p>
+                {isLoading ? (
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 animate-pulse" />
+                ) : (
+                  <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                    Próximo: {getProximoTipoLabel()}
+                  </p>
+                )}
               </div>
             </CardHeader>
             <CardContent className="text-center">
-              <Button
-                onClick={handleRegistrarPonto}
-                disabled={isRegistrando || !getProximoTipoRegistro()}
-                className={`w-full h-16 text-lg font-semibold rounded-xl shadow-lg ${
-                  !getProximoTipoRegistro()
-                    ? "bg-gray-400 hover:bg-gray-400 text-gray-600 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                }`}
-              >
-                {isRegistrando ? (
+              {isLoading ? (
+                // Skeleton do botão durante carregamento
+                <div className="w-full h-16 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse flex items-center justify-center">
                   <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Registrando...
+                    <div className="w-6 h-6 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse" />
+                    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-32 animate-pulse" />
                   </div>
-                ) : !getProximoTipoRegistro() ? (
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-6 h-6" />
-                    {getProximoTipoLabel()}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-6 h-6" />
-                    Registrar {getProximoTipoLabel()}
-                  </div>
-                )}
-              </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={handleRegistrarPonto}
+                  disabled={isRegistrando || !getProximoTipoRegistro()}
+                  className={`w-full h-16 text-lg font-semibold rounded-xl shadow-lg ${
+                    !getProximoTipoRegistro()
+                      ? "bg-gray-400 hover:bg-gray-400 text-gray-600 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                  }`}
+                >
+                  {isRegistrando ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Registrando...
+                    </div>
+                  ) : !getProximoTipoRegistro() ? (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-6 h-6" />
+                      {getProximoTipoLabel()}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-6 h-6" />
+                      Registrar {getProximoTipoLabel()}
+                    </div>
+                  )}
+                </Button>
+              )}
             </CardContent>
           </Card>
 
@@ -412,9 +427,7 @@ export default function FuncionarioPage() {
                               registro.temJustificativaPendente && (
                                 <div className="mt-2">
                                   <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-                                    <span>
-                                      Justificativa enviada
-                                    </span>
+                                    <span>Justificativa enviada</span>
                                   </div>
                                 </div>
                               )}

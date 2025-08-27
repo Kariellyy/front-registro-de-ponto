@@ -86,10 +86,7 @@ export default function ConfiguracoesPage() {
 
           // Verificar se os dados foram carregados corretamente
           if (empresaCompleta && typeof empresaCompleta === "object") {
-            console.log(
-              "Horários semanais recebidos:",
-              empresaCompleta.horariosSemanais
-            );
+
 
             setFormData({
               nome: empresaCompleta.nome || empresa.name || "",

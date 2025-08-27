@@ -15,6 +15,17 @@ export function useFuncionarioDashboard() {
   );
   const { getCurrentPosition } = useGeolocation();
 
+  // Função utilitária para formatar data no fuso horário local
+  const formatarDataLocal = (data: Date): string => {
+    return (
+      data.getFullYear() +
+      "-" +
+      String(data.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(data.getDate()).padStart(2, "0")
+    );
+  };
+
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
@@ -47,17 +58,24 @@ export function useFuncionarioDashboard() {
     | "intervalo_inicio"
     | "intervalo_fim"
     | null => {
+    // Durante o carregamento, não retornar nenhum tipo
+    if (isLoading) {
+      return null;
+    }
+
     if (!registros || registros.length === 0) {
       return "entrada";
     }
 
-    // Buscar registros de hoje
-    const hoje = new Date().toISOString().split("T")[0];
+    // Buscar registros de hoje usando fuso horário local
+    const hoje = new Date();
+    const hojeLocal = formatarDataLocal(hoje);
+
     const registrosHoje = registros.filter((registro) => {
-      const dataRegistro = new Date(registro.dataHora)
-        .toISOString()
-        .split("T")[0];
-      return dataRegistro === hoje;
+      const dataRegistro = new Date(registro.dataHora);
+      const dataRegistroLocal = formatarDataLocal(dataRegistro);
+
+      return dataRegistroLocal === hojeLocal;
     });
 
     if (registrosHoje.length === 0) {
