@@ -1,182 +1,283 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Check, Download, Eye, Search, X } from "lucide-react";
+"use client";
 
-const justificativas = [
-  {
-    id: "1",
-    funcionario: "João Silva",
-    data: "2024-01-15",
-    motivo: "Atraso por trânsito",
-    descricao: "Atraso de 30 minutos devido a acidente na via principal",
-    status: "pendente",
-    dataJustificativa: "2024-01-15",
-  },
-  {
-    id: "2",
-    funcionario: "Maria Santos",
-    data: "2024-01-14",
-    motivo: "Consulta médica",
-    descricao: "Saída antecipada para consulta médica agendada",
-    status: "aprovada",
-    dataJustificativa: "2024-01-14",
-  },
-  {
-    id: "3",
-    funcionario: "Pedro Costa",
-    data: "2024-01-13",
-    motivo: "Esquecimento de bater ponto",
-    descricao: "Esqueci de bater o ponto na saída do almoço",
-    status: "rejeitada",
-    dataJustificativa: "2024-01-13",
-  },
-];
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  FileText,
+  Loader2,
+  XCircle,
+} from "lucide-react";
+import { useState } from "react";
+
+import { FiltrosJustificativas } from "@/components/justificativas/FiltrosJustificativas";
+import { JustificativaCard } from "@/components/justificativas/JustificativaCard";
+import { ModalAprovarJustificativa } from "@/components/justificativas/ModalAprovarJustificativa";
+import { ModalDetalhesJustificativa } from "@/components/justificativas/ModalDetalhesJustificativa";
+import { useJustificativas } from "@/hooks/use-justificativas";
+import { StatusJustificativa } from "@/types/justificativa";
 
 export default function JustificativasPage() {
+  const [modalAprovar, setModalAprovar] = useState<{
+    isOpen: boolean;
+    justificativaId: string;
+  }>({ isOpen: false, justificativaId: "" });
+
+  const [modalDetalhes, setModalDetalhes] = useState<{
+    isOpen: boolean;
+    justificativaId: string;
+  }>({ isOpen: false, justificativaId: "" });
+
+  const isAdmin = true; // TODO: Implementar verificação de role do usuário
+
+  const {
+    justificativas,
+    justificativasPendentes,
+    justificativasAprovadas,
+    justificativasRejeitadas,
+    loading,
+    filtros,
+    estatisticas,
+    aprovarJustificativa,
+    atualizarFiltros,
+    limparFiltros,
+  } = useJustificativas({ isAdmin });
+
+  const handleAprovarJustificativa = async (
+    status: "aprovada" | "rejeitada",
+    observacoes?: string
+  ) => {
+    try {
+      await aprovarJustificativa(modalAprovar.justificativaId, {
+        status:
+          status === "aprovada"
+            ? StatusJustificativa.APROVADA
+            : StatusJustificativa.REJEITADA,
+        observacoes,
+      });
+    } catch (error) {
+      console.error("Erro ao aprovar justificativa:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">
-          Justificativas de Pontos
-        </h1>
-        <Button className="flex items-center gap-2">
-          <Download className="w-4 h-4" />
-          Exportar Relatório
-        </Button>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Justificativas</h1>
+          <p className="text-muted-foreground">
+            Gerencie e aprove justificativas de registros de ponto
+          </p>
+        </div>
+      </div>
+
+      {/* Cards de Estatísticas */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{estatisticas.total}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
+            <Clock className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">
+              {estatisticas.pendentes}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Aprovadas</CardTitle>
+            <CheckCircle className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {estatisticas.aprovadas}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Rejeitadas</CardTitle>
+            <XCircle className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              {estatisticas.rejeitadas}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filtros */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar funcionário..."
-                  className="pl-10"
+      <FiltrosJustificativas
+        filtros={filtros}
+        onFiltrosChange={atualizarFiltros}
+        onLimparFiltros={limparFiltros}
+      />
+
+      {/* Tabs de Justificativas */}
+      <Tabs defaultValue="todas" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="todas">
+            Todas ({justificativas.length})
+          </TabsTrigger>
+          <TabsTrigger value="pendentes">
+            Pendentes ({justificativasPendentes.length})
+          </TabsTrigger>
+          <TabsTrigger value="aprovadas">
+            Aprovadas ({justificativasAprovadas.length})
+          </TabsTrigger>
+          <TabsTrigger value="rejeitadas">
+            Rejeitadas ({justificativasRejeitadas.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="todas" className="space-y-4">
+          {justificativas.length === 0 ? (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Nenhuma justificativa encontrada.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {justificativas.map((justificativa) => (
+                <JustificativaCard
+                  key={justificativa.id}
+                  justificativa={justificativa}
+                  isAdmin={isAdmin}
+                  onAprovar={(id) =>
+                    setModalAprovar({ isOpen: true, justificativaId: id })
+                  }
+                  onRejeitar={(id) =>
+                    setModalAprovar({ isOpen: true, justificativaId: id })
+                  }
+                  onVerDetalhes={(id) =>
+                    setModalDetalhes({ isOpen: true, justificativaId: id })
+                  }
                 />
-              </div>
+              ))}
             </div>
-            <select className="px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary bg-background text-foreground">
-              <option>Todos os status</option>
-              <option>Pendente</option>
-              <option>Aprovada</option>
-              <option>Rejeitada</option>
-            </select>
-            <input
-              type="date"
-              className="px-4 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary bg-background text-foreground"
-            />
-          </div>
-        </CardContent>
-      </Card>
+          )}
+        </TabsContent>
 
-      {/* Lista de justificativas */}
-      <div className="space-y-4">
-        {justificativas.map((justificativa) => (
-          <Card key={justificativa.id}>
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-4 mb-3">
-                    <h3 className="font-semibold text-foreground">
-                      {justificativa.funcionario}
-                    </h3>
-                    <Badge
-                      variant={
-                        justificativa.status === "pendente"
-                          ? "secondary"
-                          : justificativa.status === "aprovada"
-                          ? "default"
-                          : "destructive"
-                      }
-                    >
-                      {justificativa.status === "pendente"
-                        ? "Pendente"
-                        : justificativa.status === "aprovada"
-                        ? "Aprovada"
-                        : "Rejeitada"}
-                    </Badge>
-                  </div>
+        <TabsContent value="pendentes" className="space-y-4">
+          {justificativasPendentes.length === 0 ? (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Nenhuma justificativa pendente encontrada.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {justificativasPendentes.map((justificativa) => (
+                <JustificativaCard
+                  key={justificativa.id}
+                  justificativa={justificativa}
+                  isAdmin={isAdmin}
+                  onAprovar={(id) =>
+                    setModalAprovar({ isOpen: true, justificativaId: id })
+                  }
+                  onRejeitar={(id) =>
+                    setModalAprovar({ isOpen: true, justificativaId: id })
+                  }
+                  onVerDetalhes={(id) =>
+                    setModalDetalhes({ isOpen: true, justificativaId: id })
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                    <div>
-                      <span className="font-medium">Data do Ponto:</span>{" "}
-                      {new Date(justificativa.data).toLocaleDateString("pt-BR")}
-                    </div>
-                    <div>
-                      <span className="font-medium">Data da Justificativa:</span>{" "}
-                      {new Date(
-                        justificativa.dataJustificativa
-                      ).toLocaleDateString("pt-BR")}
-                    </div>
-                    <div>
-                      <span className="font-medium">Motivo:</span>{" "}
-                      {justificativa.motivo}
-                    </div>
-                  </div>
+        <TabsContent value="aprovadas" className="space-y-4">
+          {justificativasAprovadas.length === 0 ? (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Nenhuma justificativa aprovada encontrada.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {justificativasAprovadas.map((justificativa) => (
+                <JustificativaCard
+                  key={justificativa.id}
+                  justificativa={justificativa}
+                  isAdmin={isAdmin}
+                  onVerDetalhes={(id) =>
+                    setModalDetalhes({ isOpen: true, justificativaId: id })
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
 
-                  <div className="mt-3">
-                    <span className="font-medium text-sm text-muted-foreground">
-                      Descrição:
-                    </span>
-                    <p className="text-foreground mt-1">
-                      {justificativa.descricao}
-                    </p>
-                  </div>
-                </div>
+        <TabsContent value="rejeitadas" className="space-y-4">
+          {justificativasRejeitadas.length === 0 ? (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Nenhuma justificativa rejeitada encontrada.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {justificativasRejeitadas.map((justificativa) => (
+                <JustificativaCard
+                  key={justificativa.id}
+                  justificativa={justificativa}
+                  isAdmin={isAdmin}
+                  onVerDetalhes={(id) =>
+                    setModalDetalhes({ isOpen: true, justificativaId: id })
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
-                <div className="flex items-center gap-2 ml-4">
-                  <Button variant="ghost" size="sm">
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  {justificativa.status === "pendente" && (
-                    <>
-                      <Button variant="ghost" size="sm" className="text-success hover:text-success/70">
-                        <Check className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive/70">
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Modal de Aprovação */}
+      <ModalAprovarJustificativa
+        isOpen={modalAprovar.isOpen}
+        justificativaId={modalAprovar.justificativaId}
+        onClose={() => setModalAprovar({ isOpen: false, justificativaId: "" })}
+        onConfirm={handleAprovarJustificativa}
+      />
 
-      {/* Paginação */}
-      <Card>
-        <CardContent className="flex items-center justify-between px-6 py-4">
-          <div className="text-sm text-muted-foreground">
-            Mostrando 3 de 3 justificativas
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled
-            >
-              Anterior
-            </Button>
-            <Button size="sm">
-              1
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled
-            >
-              Próximo
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Modal de Detalhes */}
+      <ModalDetalhesJustificativa
+        isOpen={modalDetalhes.isOpen}
+        justificativaId={modalDetalhes.justificativaId}
+        onClose={() => setModalDetalhes({ isOpen: false, justificativaId: "" })}
+      />
     </div>
   );
 }

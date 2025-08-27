@@ -5,6 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { GoogleMapsProvider } from "@/contexts/GoogleMapsContext";
 import { SessionProvider } from "next-auth/react";
 import { ReactNode } from "react";
+import { Toaster } from "sonner";
 
 interface ClientProvidersProps {
   children: ReactNode;
@@ -26,6 +27,7 @@ export function ClientProviders({
         <AuthProvider>
           <GoogleMapsProvider apiKey={googleMapsApiKey}>
             {children}
+            <Toaster />
           </GoogleMapsProvider>
         </AuthProvider>
       </ThemeProvider>
