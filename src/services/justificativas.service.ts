@@ -3,7 +3,6 @@ import {
   AprovarJustificativaRequest,
   CriarJustificativaRequest,
   EstatisticasJustificativas,
-  FiltrosJustificativas,
   Justificativa,
 } from "@/types/justificativa";
 
@@ -25,18 +24,8 @@ export class JustificativasService {
     return api.get<Justificativa>(`${this.basePath}/${id}`);
   }
 
-  async buscarTodasJustificativas(
-    filtros?: FiltrosJustificativas
-  ): Promise<Justificativa[]> {
-    const params = new URLSearchParams();
-
-    if (filtros?.status) params.append("status", filtros.status);
-    if (filtros?.tipo) params.append("tipo", filtros.tipo);
-    if (filtros?.dataInicio) params.append("dataInicio", filtros.dataInicio);
-    if (filtros?.dataFim) params.append("dataFim", filtros.dataFim);
-    if (filtros?.usuarioId) params.append("usuarioId", filtros.usuarioId);
-
-    return api.get<Justificativa[]>(`${this.basePath}?${params.toString()}`);
+  async buscarTodasJustificativas(): Promise<Justificativa[]> {
+    return api.get<Justificativa[]>(`${this.basePath}`);
   }
 
   async aprovarJustificativa(

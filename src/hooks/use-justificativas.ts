@@ -1,7 +1,6 @@
 import { justificativasService } from "@/services/justificativas.service";
 import {
   AprovarJustificativaRequest,
-  FiltrosJustificativas,
   Justificativa,
 } from "@/types/justificativa";
 import { useCallback, useEffect, useState } from "react";
@@ -16,7 +15,6 @@ export function useJustificativas({
 }: UseJustificativasProps = {}) {
   const [justificativas, setJustificativas] = useState<Justificativa[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filtros, setFiltros] = useState<FiltrosJustificativas>({});
   const [estatisticas, setEstatisticas] = useState({
     total: 0,
     pendentes: 0,
@@ -28,7 +26,7 @@ export function useJustificativas({
     try {
       setLoading(true);
       const data = isAdmin
-        ? await justificativasService.buscarTodasJustificativas(filtros)
+        ? await justificativasService.buscarTodasJustificativas()
         : await justificativasService.buscarMinhasJustificativas();
       setJustificativas(data);
     } catch (error) {
@@ -37,7 +35,7 @@ export function useJustificativas({
     } finally {
       setLoading(false);
     }
-  }, [filtros, isAdmin]);
+  }, [isAdmin]);
 
   const carregarEstatisticas = useCallback(async () => {
     try {
@@ -84,17 +82,6 @@ export function useJustificativas({
     [carregarJustificativas, carregarEstatisticas]
   );
 
-  const atualizarFiltros = useCallback(
-    (novosFiltros: FiltrosJustificativas) => {
-      setFiltros(novosFiltros);
-    },
-    []
-  );
-
-  const limparFiltros = useCallback(() => {
-    setFiltros({});
-  }, []);
-
   useEffect(() => {
     carregarJustificativas();
     carregarEstatisticas();
@@ -116,12 +103,9 @@ export function useJustificativas({
     justificativasAprovadas,
     justificativasRejeitadas,
     loading,
-    filtros,
     estatisticas,
     aprovarJustificativa,
     deletarJustificativa,
-    atualizarFiltros,
-    limparFiltros,
     recarregar: carregarJustificativas,
   };
 }

@@ -13,8 +13,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { FiltrosJustificativas } from "@/components/justificativas/FiltrosJustificativas";
-import { JustificativaCard } from "@/components/justificativas/JustificativaCard";
+import { JustificativaTable } from "@/components/justificativas/JustificativaTable";
 import { ModalAprovarJustificativa } from "@/components/justificativas/ModalAprovarJustificativa";
 import { ModalDetalhesJustificativa } from "@/components/justificativas/ModalDetalhesJustificativa";
 import { useJustificativas } from "@/hooks/use-justificativas";
@@ -39,11 +38,8 @@ export default function JustificativasPage() {
     justificativasAprovadas,
     justificativasRejeitadas,
     loading,
-    filtros,
     estatisticas,
     aprovarJustificativa,
-    atualizarFiltros,
-    limparFiltros,
   } = useJustificativas({ isAdmin });
 
   const handleAprovarJustificativa = async (
@@ -131,13 +127,6 @@ export default function JustificativasPage() {
         </Card>
       </div>
 
-      {/* Filtros */}
-      <FiltrosJustificativas
-        filtros={filtros}
-        onFiltrosChange={atualizarFiltros}
-        onLimparFiltros={limparFiltros}
-      />
-
       {/* Tabs de Justificativas */}
       <Tabs defaultValue="todas" className="space-y-4">
         <TabsList>
@@ -164,24 +153,19 @@ export default function JustificativasPage() {
               </AlertDescription>
             </Alert>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {justificativas.map((justificativa) => (
-                <JustificativaCard
-                  key={justificativa.id}
-                  justificativa={justificativa}
-                  isAdmin={isAdmin}
-                  onAprovar={(id) =>
-                    setModalAprovar({ isOpen: true, justificativaId: id })
-                  }
-                  onRejeitar={(id) =>
-                    setModalAprovar({ isOpen: true, justificativaId: id })
-                  }
-                  onVerDetalhes={(id) =>
-                    setModalDetalhes({ isOpen: true, justificativaId: id })
-                  }
-                />
-              ))}
-            </div>
+            <JustificativaTable
+              justificativas={justificativas}
+              isAdmin={isAdmin}
+              onAprovar={(id) =>
+                setModalAprovar({ isOpen: true, justificativaId: id })
+              }
+              onRejeitar={(id) =>
+                setModalAprovar({ isOpen: true, justificativaId: id })
+              }
+              onVerDetalhes={(id) =>
+                setModalDetalhes({ isOpen: true, justificativaId: id })
+              }
+            />
           )}
         </TabsContent>
 
@@ -194,24 +178,19 @@ export default function JustificativasPage() {
               </AlertDescription>
             </Alert>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {justificativasPendentes.map((justificativa) => (
-                <JustificativaCard
-                  key={justificativa.id}
-                  justificativa={justificativa}
-                  isAdmin={isAdmin}
-                  onAprovar={(id) =>
-                    setModalAprovar({ isOpen: true, justificativaId: id })
-                  }
-                  onRejeitar={(id) =>
-                    setModalAprovar({ isOpen: true, justificativaId: id })
-                  }
-                  onVerDetalhes={(id) =>
-                    setModalDetalhes({ isOpen: true, justificativaId: id })
-                  }
-                />
-              ))}
-            </div>
+            <JustificativaTable
+              justificativas={justificativasPendentes}
+              isAdmin={isAdmin}
+              onAprovar={(id) =>
+                setModalAprovar({ isOpen: true, justificativaId: id })
+              }
+              onRejeitar={(id) =>
+                setModalAprovar({ isOpen: true, justificativaId: id })
+              }
+              onVerDetalhes={(id) =>
+                setModalDetalhes({ isOpen: true, justificativaId: id })
+              }
+            />
           )}
         </TabsContent>
 
@@ -224,18 +203,13 @@ export default function JustificativasPage() {
               </AlertDescription>
             </Alert>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {justificativasAprovadas.map((justificativa) => (
-                <JustificativaCard
-                  key={justificativa.id}
-                  justificativa={justificativa}
-                  isAdmin={isAdmin}
-                  onVerDetalhes={(id) =>
-                    setModalDetalhes({ isOpen: true, justificativaId: id })
-                  }
-                />
-              ))}
-            </div>
+            <JustificativaTable
+              justificativas={justificativasAprovadas}
+              isAdmin={isAdmin}
+              onVerDetalhes={(id) =>
+                setModalDetalhes({ isOpen: true, justificativaId: id })
+              }
+            />
           )}
         </TabsContent>
 
@@ -248,18 +222,13 @@ export default function JustificativasPage() {
               </AlertDescription>
             </Alert>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {justificativasRejeitadas.map((justificativa) => (
-                <JustificativaCard
-                  key={justificativa.id}
-                  justificativa={justificativa}
-                  isAdmin={isAdmin}
-                  onVerDetalhes={(id) =>
-                    setModalDetalhes({ isOpen: true, justificativaId: id })
-                  }
-                />
-              ))}
-            </div>
+            <JustificativaTable
+              justificativas={justificativasRejeitadas}
+              isAdmin={isAdmin}
+              onVerDetalhes={(id) =>
+                setModalDetalhes({ isOpen: true, justificativaId: id })
+              }
+            />
           )}
         </TabsContent>
       </Tabs>

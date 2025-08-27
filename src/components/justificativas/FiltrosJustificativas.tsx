@@ -95,7 +95,6 @@ export function FiltrosJustificativas({
                   <SelectValue placeholder="Todos os status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os status</SelectItem>
                   {statusOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -115,7 +114,6 @@ export function FiltrosJustificativas({
                   <SelectValue placeholder="Todos os tipos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os tipos</SelectItem>
                   {tipoOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}

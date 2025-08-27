@@ -412,10 +412,8 @@ export default function FuncionarioPage() {
                               registro.temJustificativaPendente && (
                                 <div className="mt-2">
                                   <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-                                    <AlertCircle className="w-4 h-4" />
                                     <span>
-                                      Justificativa enviada - Aguardando
-                                      aprovação
+                                      Justificativa enviada
                                     </span>
                                   </div>
                                 </div>
