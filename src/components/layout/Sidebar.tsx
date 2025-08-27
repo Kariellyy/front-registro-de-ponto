@@ -56,11 +56,6 @@ const menuItems = [
     icon: UserX,
   },
   {
-    name: "Gestão de Férias",
-    href: "/dashboard/ferias",
-    icon: Calendar,
-  },
-  {
     name: "Justificativas",
     href: "/dashboard/justificativas",
     icon: MessageSquare,
