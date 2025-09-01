@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/components/ui/toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDepartamentos } from "@/hooks/use-departamentos";
 import { useFuncionarioActions } from "@/hooks/use-funcionarios";
@@ -13,13 +12,14 @@ import { gerarHorariosPadrao } from "@/lib/horarios";
 import { Cargo, cargosService } from "@/services/cargos.service";
 import { empresasService } from "@/services/empresas.service";
 import {
-  CreateFuncionarioRequest,
-  UpdateFuncionarioRequest,
+    CreateFuncionarioRequest,
+    UpdateFuncionarioRequest,
 } from "@/services/funcionarios.service";
 import { Funcionario } from "@/types";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { HorariosFuncionarioConfig } from "./HorariosFuncionarioConfig";
 
 const formatCPF = (value: string) => {
@@ -132,7 +132,7 @@ export function CreateFuncionarioModal({
   const [isLoadingFuncionarioData, setIsLoadingFuncionarioData] =
     useState(false);
   const [isLoadingCargos, setIsLoadingCargos] = useState(false);
-  const toast = useToast();
+
 
   const {
     register,
@@ -358,9 +358,7 @@ export function CreateFuncionarioModal({
   if (!isOpen) return null;
 
   return (
-    <>
-      <toast.ToastContainer />
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -700,6 +698,5 @@ export function CreateFuncionarioModal({
 
         {/* Removido: modal de adicionar departamento */}
       </div>
-    </>
   );
 }
