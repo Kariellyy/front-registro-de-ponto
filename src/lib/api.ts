@@ -9,6 +9,30 @@ class ApiClient {
     this.baseURL = baseURL;
   }
 
+  private normalizeDatesToUTC(value: any): any {
+    if (value === null || value === undefined) return value;
+    if (value instanceof Date) return value.toISOString();
+    if (Array.isArray(value))
+      return value.map((v) => this.normalizeDatesToUTC(v));
+    if (typeof value === "object") {
+      const out: Record<string, any> = {};
+      for (const [k, v] of Object.entries(value))
+        out[k] = this.normalizeDatesToUTC(v);
+      return out;
+    }
+    if (typeof value === "string") {
+      // manter datas puras YYYY-MM-DD
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+      // já em ISO com timezone (Z ou +hh:mm)
+      if (/Z$|[\+\-]\d{2}:?\d{2}$/.test(value)) return value;
+      // strings de data-hora sem timezone → normalizar para UTC
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) return d.toISOString();
+      return value;
+    }
+    return value;
+  }
+
   private async getAuthHeaders(): Promise<Record<string, string>> {
     const session = await getSession();
     return session?.accessToken
@@ -21,6 +45,11 @@ class ApiClient {
 
     const authHeaders = await this.getAuthHeaders();
 
+    let body = options.body as any;
+    if (body && typeof body === "object" && !(body instanceof FormData)) {
+      body = JSON.stringify(this.normalizeDatesToUTC(body));
+    }
+
     const config: RequestInit = {
       headers: {
         "Content-Type": "application/json",
@@ -28,6 +57,7 @@ class ApiClient {
         ...options.headers,
       },
       ...options,
+      body,
     };
 
     try {
