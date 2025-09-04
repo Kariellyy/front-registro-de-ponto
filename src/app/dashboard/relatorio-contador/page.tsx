@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -5,51 +7,111 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { api } from "@/lib/api";
 import { Calendar, ChevronDown, Download } from "lucide-react";
+import { getSession } from "next-auth/react";
+import { useEffect, useMemo, useState } from "react";
 
-const relatorioMensal = {
-  mes: "Janeiro 2024",
-  totalFuncionarios: 50,
-  horasRegulares: 8800,
-  horasExtras: 127,
-  horasDebito: 23,
-  saldoBancoHoras: 104,
+type RelatorioResumo = {
+  totalFuncionarios: number;
+  horasRegulares: number;
+  horasExtras: number;
+  horasDebito: number;
+  saldoBancoHoras: number;
 };
 
-const funcionarios = [
-  {
-    id: "1",
-    nome: "João Silva",
-    horasRegulares: 176,
-    horasExtras: 12,
-    horasDebito: 0,
-    saldoMes: 12,
-    saldoAcumulado: 25,
-  },
-  {
-    id: "2",
-    nome: "Maria Santos",
-    horasRegulares: 176,
-    horasExtras: 8,
-    horasDebito: 2,
-    saldoMes: 6,
-    saldoAcumulado: 18,
-  },
-  {
-    id: "3",
-    nome: "Pedro Costa",
-    horasRegulares: 172,
-    horasExtras: 0,
-    horasDebito: 4,
-    saldoMes: -4,
-    saldoAcumulado: 2,
-  },
-];
+type RelatorioFuncionario = {
+  id: string;
+  nome: string;
+  horasRegulares: number;
+  horasExtras: number;
+  horasDebito: number;
+  saldoMes: number;
+  saldoAcumulado: number;
+};
 
 export default function RelatorioContadorPage() {
+  const now = new Date();
+  const [mes, setMes] = useState<number>(now.getUTCMonth() + 1);
+  const [ano, setAno] = useState<number>(now.getUTCFullYear());
+  const [loading, setLoading] = useState(false);
+  const [resumo, setResumo] = useState<RelatorioResumo | null>(null);
+  const [funcionarios, setFuncionarios] = useState<RelatorioFuncionario[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const meses = useMemo(
+    () => [
+      "Janeiro",
+      "Fevereiro",
+      "Março",
+      "Abril",
+      "Maio",
+      "Junho",
+      "Julho",
+      "Agosto",
+      "Setembro",
+      "Outubro",
+      "Novembro",
+      "Dezembro",
+    ],
+    []
+  );
+
+  const anos = useMemo(() => {
+    const y = now.getUTCFullYear();
+    return [y - 2, y - 1, y, y + 1];
+  }, [now]);
+
+  async function carregar() {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.get<{
+        resumo: RelatorioResumo;
+        funcionarios: RelatorioFuncionario[];
+      }>(`/ponto/relatorio-contador?mes=${mes}&ano=${ano}`);
+      setResumo(data.resumo);
+      setFuncionarios(data.funcionarios);
+    } catch (e: any) {
+      setError(e?.message || "Erro ao carregar relatório");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    carregar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleExportPdf() {
+    const base = process.env.NEXT_PUBLIC_API_URL as string;
+    const session = await getSession();
+    const res = await fetch(
+      `${base}/ponto/relatorio-contador/pdf?mes=${mes}&ano=${ano}`,
+      {
+        headers: session?.accessToken
+          ? { Authorization: `Bearer ${session.accessToken}` }
+          : {},
+      }
+    );
+    if (!res.ok) throw new Error("Falha ao gerar PDF");
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `relatorio-contador-${ano}-${String(mes).padStart(
+      2,
+      "0"
+    )}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="space-y-6">
-      {/* Barra compacta no topo */}
       <div className="bg-background border-b border-border pb-4">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-foreground">
@@ -64,178 +126,216 @@ export default function RelatorioContadorPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <Download className="w-4 h-4 mr-2" />
-                Exportar PDF
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Download className="w-4 h-4 mr-2" />
-                Exportar Excel
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Download className="w-4 h-4 mr-2" />
-                Exportar CSV
+              <DropdownMenuItem onClick={handleExportPdf}>
+                <Download className="w-4 h-4 mr-2" /> Exportar PDF
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        
-        {/* Filtro compacto */}
+
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium text-muted-foreground">
               Período:
             </label>
-            <select className="px-3 py-1.5 text-sm border border-input rounded-md focus:ring-2 focus:ring-primary bg-background text-foreground">
-              <option>Janeiro</option>
-              <option>Fevereiro</option>
-              <option>Março</option>
-              <option>Abril</option>
-              <option>Maio</option>
-              <option>Junho</option>
-              <option>Julho</option>
-              <option>Agosto</option>
-              <option>Setembro</option>
-              <option>Outubro</option>
-              <option>Novembro</option>
-              <option>Dezembro</option>
+            <select
+              value={mes}
+              onChange={(e) => setMes(Number(e.target.value))}
+              className="px-3 py-1.5 text-sm border border-input rounded-md focus:ring-2 focus:ring-primary bg-background text-foreground"
+            >
+              {meses.map((m, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {m}
+                </option>
+              ))}
             </select>
-            <select className="px-3 py-1.5 text-sm border border-input rounded-md focus:ring-2 focus:ring-primary bg-background text-foreground">
-              <option>2024</option>
-              <option>2023</option>
-              <option>2022</option>
+            <select
+              value={ano}
+              onChange={(e) => setAno(Number(e.target.value))}
+              className="px-3 py-1.5 text-sm border border-input rounded-md focus:ring-2 focus:ring-primary bg-background text-foreground"
+            >
+              {anos.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
             </select>
-            <Button size="sm" className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Gerar Relatório
+            <Button
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={carregar}
+              disabled={loading}
+            >
+              <Calendar className="w-4 h-4" />{" "}
+              {loading ? "Gerando..." : "Gerar Relatório"}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Resumo do período */}
+      {error && (
+        <div className="text-sm text-red-600 dark:text-red-400">{error}</div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center relative">
-          <div className="absolute top-0 left-0 w-1 h-full rounded-l-lg" style={{backgroundColor: '#5baca3'}}></div>
+          <div
+            className="absolute top-0 left-0 w-1 h-full rounded-l-lg"
+            style={{ backgroundColor: "#5baca3" }}
+          ></div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {relatorioMensal.totalFuncionarios}
+            {resumo?.totalFuncionarios ?? 0}
           </div>
-          <div className="text-sm text-gray-700 dark:text-gray-300">Funcionários</div>
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            Funcionários
+          </div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center relative">
-          <div className="absolute top-0 left-0 w-1 h-full rounded-l-lg" style={{backgroundColor: '#5baca3'}}></div>
+          <div
+            className="absolute top-0 left-0 w-1 h-full rounded-l-lg"
+            style={{ backgroundColor: "#5baca3" }}
+          ></div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {relatorioMensal.horasRegulares}h
+            {resumo?.horasRegulares ?? 0}h
           </div>
-          <div className="text-sm text-gray-700 dark:text-gray-300">Horas Regulares</div>
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            Horas Regulares
+          </div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center relative">
-          <div className="absolute top-0 left-0 w-1 h-full rounded-l-lg" style={{backgroundColor: '#5baca3'}}></div>
+          <div
+            className="absolute top-0 left-0 w-1 h-full rounded-l-lg"
+            style={{ backgroundColor: "#5baca3" }}
+          ></div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {relatorioMensal.horasExtras}h
+            {resumo?.horasExtras ?? 0}h
           </div>
-          <div className="text-sm text-gray-700 dark:text-gray-300">Horas Extras</div>
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            Horas Extras
+          </div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center relative">
-          <div className="absolute top-0 left-0 w-1 h-full rounded-l-lg" style={{backgroundColor: '#5baca3'}}></div>
+          <div
+            className="absolute top-0 left-0 w-1 h-full rounded-l-lg"
+            style={{ backgroundColor: "#5baca3" }}
+          ></div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {relatorioMensal.horasDebito}h
+            {resumo?.horasDebito ?? 0}h
           </div>
-          <div className="text-sm text-gray-700 dark:text-gray-300">Horas Débito</div>
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            Horas Débito
+          </div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center relative">
-          <div className="absolute top-0 left-0 w-1 h-full rounded-l-lg" style={{backgroundColor: '#5baca3'}}></div>
+          <div
+            className="absolute top-0 left-0 w-1 h-full rounded-l-lg"
+            style={{ backgroundColor: "#5baca3" }}
+          ></div>
           <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {relatorioMensal.saldoBancoHoras}h
+            {resumo?.saldoBancoHoras ?? 0}h
           </div>
-          <div className="text-sm text-gray-700 dark:text-gray-300">Saldo Banco Horas</div>
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            Saldo Banco Horas
+          </div>
         </div>
       </div>
 
-      {/* Detalhamento por funcionário */}
       <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                  <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Funcionário
-                  </th>
-                  <th className="text-center px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Horas Regulares
-                  </th>
-                  <th className="text-center px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Horas Extras
-                  </th>
-                  <th className="text-center px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Horas Débito
-                  </th>
-                  <th className="text-center px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Saldo do Mês
-                  </th>
-                  <th className="text-center px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Saldo Acumulado
-                  </th>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Funcionário
+                </th>
+                <th className="text-center px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Horas Regulares
+                </th>
+                <th className="text-center px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Horas Extras
+                </th>
+                <th className="text-center px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Horas Débito
+                </th>
+                <th className="text-center px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Saldo do Mês
+                </th>
+                <th className="text-center px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Saldo Acumulado
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="px-6 py-6 text-center text-sm text-muted-foreground"
+                  >
+                    Carregando...
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {funcionarios.map((funcionario, index) => (
-                  <tr 
-                    key={funcionario.id} 
+              ) : (
+                funcionarios.map((f, index) => (
+                  <tr
+                    key={f.id}
                     className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${
-                      index % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-800/30'
+                      index % 2 === 0
+                        ? "bg-white dark:bg-gray-900"
+                        : "bg-gray-50/50 dark:bg-gray-800/30"
                     }`}
                   >
                     <td className="px-6 py-4">
                       <div className="font-medium text-gray-900 dark:text-gray-100">
-                        {funcionario.nome}
+                        {f.nome}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {funcionario.horasRegulares}h
+                        {f.horasRegulares}h
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {funcionario.horasExtras}h
+                        {f.horasExtras}h
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {funcionario.horasDebito}h
+                        {f.horasDebito}h
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span
                         className={`text-sm font-semibold ${
-                          funcionario.saldoMes >= 0
+                          f.saldoMes >= 0
                             ? "text-green-600 dark:text-green-400"
                             : "text-red-600 dark:text-red-400"
                         }`}
                       >
-                        {funcionario.saldoMes >= 0 ? "+" : ""}
-                        {funcionario.saldoMes}h
+                        {f.saldoMes >= 0 ? "+" : ""}
+                        {f.saldoMes}h
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span
                         className={`text-sm font-semibold ${
-                          funcionario.saldoAcumulado >= 0
+                          f.saldoAcumulado >= 0
                             ? "text-green-600 dark:text-green-400"
                             : "text-red-600 dark:text-red-400"
                         }`}
                       >
-                        {funcionario.saldoAcumulado >= 0 ? "+" : ""}
-                        {funcionario.saldoAcumulado}h
+                        {f.saldoAcumulado >= 0 ? "+" : ""}
+                        {f.saldoAcumulado}h
                       </span>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
   );
 }
