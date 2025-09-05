@@ -19,6 +19,7 @@ const eslintConfig = [
       "react-hooks/exhaustive-deps": "off",
       "react-hooks/rules-of-hooks": "off",
       "@typescript-eslint/no-empty-object-type": "off",
+      "@typescript-eslint/no-non-null-asserted-optional-chain": "off",
     },
   },
 ];
