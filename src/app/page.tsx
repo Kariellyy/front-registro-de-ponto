@@ -1,4 +1,5 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth";
+import { LandingPage } from "@/components/landing/LandingPage";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
@@ -15,6 +16,6 @@ export default async function Home() {
       redirect("/dashboard");
     }
   } else {
-    redirect("/login");
+    return <LandingPage />;
   }
 }
